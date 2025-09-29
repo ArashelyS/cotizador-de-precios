@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Algo Special | Cotizador</title>
+    <!-- Carga de Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Configuración de Tailwind para usar la fuente Inter y los nuevos colores -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        // NUEVA PALETA DE COLORES
+                        'primary': '#FF1F9F',   // Rosa Neón (Acento principal)
+                        'secondary': '#C1FF00', // Verde Neón (Fondo de secciones destacadas)
+                        'accent': '#FF9D00',    // Naranja (Fondo del cuerpo)
+                        'text-dark': '#000000', // Negro
+                        'text-light': '#FFFFFF', // Blanco
+                        'whatsapp-green': '#25D366' // Verde de WhatsApp para el icono
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            /* Fondo ligeramente naranja con un toque de blanco */
+            background: linear-gradient(135deg, #FF9D00 0%, #FFB033 100%); 
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .card {
+            position: relative; 
+            /* Sombra más marcada para contraste */
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            border: 2px solid #000000; /* Borde negro para el estilo neón */
+        }
+        input[type="number"], select {
+            transition: all 0.2s;
+            border-color: #000000; /* Borde de inputs negro */
+        }
+        input:focus, select:focus {
+            /* Borde de foco en el color primario (Rosa Neón) */
+            border-color: #FF1F9F !important;
+            box-shadow: 0 0 0 3px rgba(255, 31, 159, 0.5) !important;
+        }
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        /* Estilo base del botón de Pedido (Rosa Neón) */
+        #order-button {
+            transition: transform 0.1s, box-shadow 0.1s;
+        }
+        #order-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px rgba(255, 31, 159, 0.5); /* Sombra en color Rosa */
+        }
+        #order-button:active {
+            transform: translateY(0);
+            box-shadow: 0 4px 10px rgba(255, 31, 159, 0.3);
+        }
+
+        /* Clase de ancho para el botón principal: w-full */
+        .action-container {
+            width: 100%;
+        }
+        
+    </style>
+</head>
+<body class="bg-gray-100">
+
+    <!-- Aumentado el ancho máximo a max-w-2xl -->
+    <div class="card bg-text-light w-full max-w-2xl p-8 rounded-2xl">
+
+        <!-- Logo integrado -->
+        <div class="mb-0 flex justify-center">
+            <img src="https://www.dropbox.com/scl/fi/xpobzj48hrvwrggk9w2iz/INSTAGRAM.png?rlkey=zcxxkd3uuj27nlbsiccynl6ju&raw=1" alt="Logo de Algo Special" class="h-40 sm:h-52 w-auto object-contain">
+        </div>
+        
+        <!-- Título y Subtítulo Actualizados -->
+        <p class="text-center text-lg text-text-dark/80 mb-1 italic font-semibold">Transforma cada momento en una experiencia extraordinaria</p>
+        <p class="text-center text-2xl font-extrabold text-primary mb-8">COTIZA TUS STICKERS</p>
+
+        <!-- Formulario de Entrada -->
+        <div class="space-y-6">
+            
+            <!-- Material: AHORA EN UN CUADRO VERDE Y EN MAYÚSCULAS -->
+            <div>
+                <!-- Contenedor verde neón para la etiqueta principal -->
+                <div class="pt-4 px-5 pb-2 bg-secondary rounded-xl border-2 border-text-dark shadow-lg mb-2">
+                    <label for="material" class="block text-lg font-extrabold text-text-dark uppercase">ELIGE EL MATERIAL</label>
+                </div>
+                
+                <!-- Select del material -->
+                <select id="material" onchange="calculateQuote()"
+                        class="mt-1 block w-full rounded-lg border-2 border-text-dark shadow-md p-3 bg-text-light focus:ring-primary focus:border-primary">
+                    <option value="premium_dtf" selected>Sticker Premium (DTF UV)</option>
+                    <option value="classic_glossy">Sticker Clásico (Adhesivo Fotoglossy)</option>
+                    <option value="vinyl_white">Sticker Vinil Impreso (Blanco)</option>
+                    <option value="vinyl_clear">Sticker Vinil Impreso (Transparente)</option>
+                </select>
+            </div>
+            
+            <!-- Contenedor para cotización por LARGO (DTF UV) - Fondo Verde Neón -->
+            <div id="length-inputs" class="space-y-4 pt-4 p-5 bg-secondary rounded-xl border-2 border-text-dark shadow-lg">
+                <p class="text-lg font-extrabold text-text-dark uppercase">COTIZACIÓN POR LARGO TOTAL IMPRESO</p>
+                <div>
+                    <!-- Etiqueta de largo modificada -->
+                    <label for="printed_length" class="block text-base font-bold text-text-dark mb-1">Centimetros para impresión</label>
+                    <input type="number" id="printed_length" value="380" min="0" step="0.1" oninput="calculateQuote()"
+                           class="mt-1 block w-full rounded-lg border-2 border-text-dark shadow-md p-3 focus:ring-primary focus:border-primary text-text-dark">
+                    <!-- Leyenda eliminada y reemplazada por texto de advertencia mínima si es necesario -->
+                    <p id="dtf-pricing-note" class="text-sm text-text-dark/70 mt-2"></p> 
+                </div>
+            </div>
+
+            <!-- Contenedor para cotización por ÁREA/CANTIDAD (Otros materiales) -->
+            <div id="area-inputs" class="space-y-6 hidden">
+                
+                <!-- INICIO: Nuevo contenedor verde para Cantidad y Tamaño -->
+                <div class="space-y-4 pt-4 p-5 bg-secondary rounded-xl border-2 border-text-dark shadow-lg">
+                    <p class="text-lg font-extrabold text-text-dark uppercase">INGRESO DE CANTIDAD Y TAMAÑO</p>
+                    
+                    <!-- Cantidad -->
+                    <div>
+                        <label for="quantity" class="block text-base font-semibold text-text-dark mb-1">Cantidad de Stickers</label>
+                        <input type="number" id="quantity" value="100" min="1" oninput="calculateQuote()"
+                               class="mt-1 block w-full rounded-lg border-2 border-text-dark shadow-md p-3 bg-text-light focus:ring-primary focus:border-primary text-text-dark">
+                        <!-- FRASE COMBINADA AQUÍ -->
+                        <p class="text-xs text-text-dark/70 mt-1">La planilla es tamaño Oficio</p>
+                    </div>
+
+                    <!-- Tamaño (Ancho y Alto) -->
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label for="width" class="block text-base font-semibold text-text-dark mb-1">Ancho (cm)</label>
+                            <input type="number" id="width" value="5" min="1" step="0.1" oninput="calculateQuote()"
+                                   class="mt-1 block w-full rounded-lg border-2 border-text-dark shadow-md p-3 bg-text-light focus:ring-primary focus:border-primary text-text-dark">
+                        </div>
+                        <div>
+                            <label for="height" class="block text-base font-semibold text-text-dark mb-1">Alto (cm)</label>
+                            <input type="number" id="height" value="5" min="1" step="0.1" oninput="calculateQuote()"
+                                   class="mt-1 block w-full rounded-lg border-2 border-text-dark shadow-md p-3 bg-text-light focus:ring-primary focus:border-primary text-text-dark">
+                        </div>
+                    </div>
+                </div>
+                <!-- FIN: Nuevo contenedor verde para Cantidad y Tamaño -->
+
+
+                <!-- Agregando el detalle de Planillas para Cricut - Fondo Verde Neón -->
+                <div class="space-y-2 pt-4 p-5 bg-secondary rounded-xl border-2 border-text-dark shadow-lg">
+                    <p class="text-lg font-extrabold text-text-dark uppercase">DETALLE DE PRODUCCIÓN</p>
+                    <div id="cricut-details" class="text-base text-text-dark">
+                        <p class="flex justify-between border-b border-text-dark/20 pb-1">
+                            <span>Stickers por Planilla:</span>
+                            <span id="fit-per-sheet" class="font-bold text-text-dark">0</span>
+                        </p>
+                        <p class="flex justify-between pt-1">
+                            <span>Planillas necesarias:</span>
+                            <span id="sheets-needed" class="font-bold text-primary text-xl">0</span>
+                        </p>
+                    </div>
+                    <!-- LEYENDA DISEÑO (Existente) -->
+                    <p class="text-xs text-text-dark/70 pt-1 font-bold text-primary">Pedido menores a 5 planillas no incluyen diseño.</p>
+                </div>
+
+            </div>
+            
+        </div>
+
+        <!-- Resultados de la Cotización -->
+        <div class="mt-8 border-t-2 border-text-dark pt-6">
+            <h2 class="text-xl font-extrabold text-text-dark mb-4">RESULTADO DE LA COTIZACIÓN</h2>
+            
+            <div class="space-y-3">
+                <!-- Precio Total - Fondo Verde Neón -->
+                <div class="flex justify-between items-center bg-secondary p-5 rounded-xl border-2 border-text-dark shadow-lg">
+                    <span class="text-xl font-extrabold text-text-dark">PRECIO TOTAL ESTIMADO:</span>
+                    <!-- Texto de precio total en Rosa Neón -->
+                    <span id="total-price" class="text-4xl font-extrabold text-primary">$1,400</span>
+                </div>
+
+                <!-- Detalles de la Cotización - Fondo Blanco con borde rosa -->
+                <div class="bg-text-light p-4 rounded-lg text-base space-y-2 border border-primary/50">
+                    
+                    <!-- Precio Unitario (Final) -->
+                    <div id="unit-price-container" class="flex justify-between">
+                        <!-- Etiqueta actualizada a "Costo por centimetro" -->
+                        <span id="unit-price-label" class="text-text-dark/80">Costo por centímetro:</span> 
+                        <span id="unit-price" class="font-bold text-text-dark">$3.70 MXN</span>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+
+        <!-- Botón de Pedido - SIN ÍCONO -->
+        <div class="mt-6 flex action-container justify-center">
+            
+            <!-- BOTÓN PRINCIPAL (Ocupa todo el ancho) -->
+            <a id="order-button" 
+               href="#" 
+               target="_blank" 
+               class="flex items-center justify-center w-full py-4 text-xl font-extrabold text-text-light bg-primary rounded-lg border-2 border-text-dark shadow-xl hover:bg-primary/80 focus:outline-none focus:ring-4 focus:ring-primary/50">
+                
+                <span>CONFIRMA TU PEDIDO AQUÍ</span>
+            </a>
+            
+        </div>
+        
+    </div>
+
+    <!-- Mensaje de estado (en lugar de alert) -->
+    <div id="message-box" class="fixed bottom-4 right-4 bg-gray-800 text-white p-3 rounded-lg shadow-xl hidden transition-opacity duration-300 opacity-0"></div>
+
+    <!-- JavaScript para el cálculo de la cotización y Firebase (MANTENIDO) -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        
+        // --- Variables Globales de Firebase (PROPORCIONADAS POR EL ENTORNO) ---
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : { /* config de fallback */ };
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+        
+        let app;
+        let db;
+        let auth;
+        let userId = null;
+
+        // Función para mostrar mensajes en pantalla (reemplaza a alert())
+        function showMessage(message) {
+            const msgBox = document.getElementById('message-box');
+            msgBox.textContent = message;
+            msgBox.classList.remove('hidden');
+            void msgBox.offsetWidth; 
+            msgBox.classList.add('opacity-100');
+
+            setTimeout(() => {
+                msgBox.classList.remove('opacity-100');
+                msgBox.classList.add('opacity-0');
+                setTimeout(() => msgBox.classList.add('hidden'), 300);
+            }, 3000);
+        }
+
+        async function initializeFirebase() {
+            try {
+                // 1. Inicializar servicios
+                app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+                
+                // 2. Manejar la autenticación
+                if (initialAuthToken) {
+                    await signInWithCustomToken(auth, initialAuthToken);
+                } else {
+                    await signInAnonymously(auth);
+                }
+
+                // 3. Listener del estado de autenticación
+                onAuthStateChanged(auth, (user) => {
+                    if (user) {
+                        userId = user.uid;
+                        // console.log(`Usuario autenticado (ID: ${userId})`); // Descomentar para debug
+                    } else {
+                        userId = null;
+                        // console.log('Sesión anónima o no activa.'); // Descomentar para debug
+                    }
+                    // Después de la autenticación inicial, cargar los datos de la app
+                    // y ejecutar la cotización inicial.
+                    calculateQuote();
+                });
+
+                // No mostramos el mensaje de inicio en el cotizador, solo ejecutamos la lógica
+                // showMessage("Firebase y la app inicializados."); 
+
+            } catch (error) {
+                console.error("Error al inicializar Firebase o la aplicación:", error);
+                showMessage('Error al cargar la aplicación. (Ver consola)');
+            }
+        }
+
+        // ======================================================================
+        // A. CONSTANTES DE PRECIOS (Tabuladores en Pesos Mexicanos - MXN)
+        // ======================================================================
+
+        // Mapa de Costo Total para Sticker Clásico (Fotoglossy) - 1 a 100 Planillas (PRECIOS CORREGIDOS)
+        const CLASSIC_GLOSSY_PRICING_MAP = {
+            // Precios de 1 a 4 planillas: $25 MXN cada una
+            1: 25, 2: 50, 3: 75, 4: 100, 
+            // Precios de 5 a 100 planillas (como se proporcionó anteriormente)
+            5: 90, 6: 108, 7: 126, 8: 144, 9: 162, 10: 180, 11: 198, 12: 216, 13: 234, 14: 252, 15: 270, 16: 288, 17: 306, 18: 324, 19: 335, 20: 340,
+            21: 357, 22: 374, 23: 391, 24: 408, 25: 425, 26: 442, 27: 459, 28: 476, 29: 493, 30: 510,
+            31: 527, 32: 544, 33: 561, 34: 578, 35: 595, 36: 612, 37: 629, 38: 646, 39: 663, 40: 680,
+            41: 697, 42: 714, 43: 720, 44: 720, 45: 720, 46: 736, 47: 740, 48: 745, 49: 745, 50: 750,
+            51: 765, 52: 780, 53: 795, 54: 810, 55: 825, 56: 840, 57: 855, 58: 870, 59: 885, 60: 900,
+            61: 915, 62: 930, 63: 945, 64: 960, 65: 975, 66: 990, 67: 1005, 68: 1020, 69: 1035, 70: 1050,
+            71: 1065, 72: 1080, 73: 1095, 74: 1110, 75: 1125, 76: 1140, 77: 1155, 78: 1170, 79: 1185, 80: 1200,
+            81: 1215, 82: 1230, 83: 1245, 84: 1260, 85: 1275, 86: 1290, 87: 1305, 88: 1320, 89: 1335, 90: 1337,
+            91: 1339, 92: 1339, 93: 1340, 94: 1344, 95: 1359, 96: 1373, 97: 1387, 98: 1392, 99: 1395, 100: 1400
+        };
+        // Tarifa de Mayoreo para Sticker Clásico (Fotoglossy) a partir de 101 planillas
+        const CLASSIC_BULK_SHEET_RATE = 14.00; 
+
+        // Tarifa base unitaria para 1-19 planillas de Vinil (USANDO TARIFAS ANTERIORES)
+        // Se asume que estas tarifas aplican solo para Vinil.
+        const VINYL_UNIT_RATE_TABLE = {
+            1: 35, 2: 35, 3: 35, 4: 35, 5: 33, 6: 33, 7: 32, 8: 32, 9: 30, 10: 30,
+            11: 29, 12: 29, 13: 28, 14: 28, 15: 27, 16: 27, 17: 27, 18: 26, 19: 26
+        };
+        // Tarifa de Mayoreo para Vinil a partir de 20 planillas
+        const VINYL_BULK_RATE = 25; 
+        const VINYL_MATERIALS = ['vinyl_white', 'vinyl_clear'];
+
+        // --- DTF UV Premium Pricing (Se mantiene sin cambios) ---
+        const DTF_DISCRETE_PRICING_MAP = {
+            10: 70, 11: 77, 12: 84, 13: 91, 14: 98, 15: 105, 16: 112, 17: 119, 18: 126, 19: 133,
+            20: 135, 21: 137, 22: 137, 23: 138, 24: 138, 25: 140, 26: 146, 27: 151, 28: 157, 29: 162,
+            30: 168, 31: 174, 32: 179, 33: 185, 34: 190, 35: 196, 36: 202, 37: 207, 38: 213, 39: 215,
+            40: 215, 41: 215, 42: 215, 43: 217, 44: 217, 45: 217, 46: 217, 47: 219, 48: 219, 49: 219,
+            50: 220, 51: 224, 52: 229, 53: 233, 54: 238, 55: 242, 56: 246, 57: 251, 58: 255, 59: 260,
+            60: 264, 61: 268, 62: 273, 63: 277, 64: 282, 65: 286, 66: 290, 67: 295, 68: 299, 69: 304,
+            70: 308, 71: 312, 72: 317, 73: 321, 74: 326, 75: 330, 76: 334, 77: 339, 78: 343, 79: 348,
+            80: 352, 81: 356, 82: 361, 83: 365, 84: 370, 85: 374, 86: 378, 87: 383, 88: 385, 89: 385,
+            90: 385, 91: 385, 92: 387, 93: 387, 94: 387, 95: 387, 96: 389, 97: 389, 98: 389, 99: 389,
+            100: 390, 101: 394, 102: 398, 103: 402, 104: 406, 105: 410, 106: 413, 107: 417, 108: 421, 109: 425,
+            110: 429, 111: 433, 112: 437, 113: 441, 114: 445, 115: 449, 116: 452, 117: 456, 118: 460, 119: 464,
+            120: 468, 121: 472, 122: 476, 123: 480, 124: 484, 125: 488, 126: 491, 127: 495, 128: 499, 129: 503,
+            130: 507, 131: 511, 132: 515, 133: 519, 134: 523, 135: 527, 136: 530, 137: 534, 138: 538, 139: 542,
+            140: 546, 141: 550, 142: 554, 143: 558, 144: 562, 145: 566, 146: 569, 147: 573, 148: 577, 149: 581,
+            150: 585, 151: 589, 152: 593, 153: 597, 154: 601, 155: 605, 156: 608, 157: 612, 158: 616, 159: 620,
+            160: 624, 161: 628, 162: 632, 163: 636, 164: 640, 165: 644, 166: 647, 167: 651, 168: 655, 169: 659,
+            170: 663, 171: 667, 172: 671, 173: 675, 174: 679, 175: 683, 176: 686, 177: 690, 178: 694, 179: 698,
+            180: 702, 181: 706, 182: 710, 183: 714, 184: 718, 185: 722, 186: 725, 187: 729, 188: 733, 189: 737,
+            190: 741, 191: 745, 192: 749, 193: 753, 194: 757, 195: 761, 196: 764, 197: 768, 198: 772, 199: 776,
+            200: 780, 201: 784, 202: 788, 203: 792, 204: 796, 205: 800, 206: 803, 207: 807, 208: 811, 209: 815,
+            210: 819, 211: 823, 212: 827, 213: 831, 214: 835, 215: 839, 216: 842, 217: 846, 218: 850, 219: 854,
+            220: 858, 221: 862, 222: 866, 223: 870, 224: 874, 225: 878, 226: 881, 227: 885, 228: 889, 229: 893,
+            230: 897, 231: 901, 232: 905, 233: 909, 234: 913, 235: 917, 236: 920, 237: 924, 238: 928, 239: 932,
+            240: 936, 241: 940, 242: 944, 243: 948, 244: 952, 245: 956, 246: 959, 247: 963, 248: 967, 249: 971,
+            250: 975, 251: 979, 252: 983, 253: 987, 254: 991, 255: 995, 256: 998, 257: 1002, 258: 1006, 259: 1010,
+            260: 1014, 261: 1018, 262: 1022, 263: 1026, 264: 1030, 265: 1034, 266: 1037, 267: 1041, 268: 1045, 269: 1049,
+            270: 1053, 271: 1057, 272: 1061, 273: 1065, 274: 1069, 275: 1073, 276: 1076, 277: 1080, 278: 1084, 279: 1088,
+            280: 1092, 281: 1096, 282: 1100, 283: 1104, 284: 1106, 285: 1106, 286: 1106, 287: 1106, 288: 1107, 289: 1107,
+            290: 1107, 291: 1107, 292: 1107, 293: 1108, 294: 1108, 295: 1108, 296: 1108, 297: 1109, 298: 1109, 299: 1109
+        };
+        const MAX_DISCRETE_CM = 299;
+        const PRICE_AT_MAX_DISCRETE_CM = DTF_DISCRETE_PRICING_MAP[MAX_DISCRETE_CM] || 0; 
+        const OVER_300_RATE_PER_CM = 3.70; 
+        const MIN_DTF_LENGTH = 10; 
+
+        // Mapeo de Materiales para el mensaje de WhatsApp (Nombres legibles)
+        const MATERIAL_NAMES = {
+            'premium_dtf': 'Sticker Premium (DTF UV)',
+            'classic_glossy': 'Sticker Clásico (Adhesivo Fotoglossy)',
+            'vinyl_white': 'Sticker Vinil Impreso (Blanco)',
+            'vinyl_clear': 'Sticker Vinil Impreso (Transparente)'
+        };
+        
+        // Parámetros para el cálculo de Planillas (se mantiene la proporción de área útil A4: 18x26cm)
+        const CRICUT_USABLE_WIDTH_CM = 18; 
+        const CRICUT_USABLE_HEIGHT_CM = 26; 
+        const STICKER_SPACING_CM = 0.3; 
+        
+        // ======================================================================
+        // B. LÓGICA DE CÁLCULO GENERAL Y FORMATO
+        // ======================================================================
+
+        /**
+         * Formatea un número como moneda (Pesos Mexicanos - MXN) SIN decimales.
+         * Usado para mostrar precios totales.
+         * @param {number} value - El valor a formatear.
+         * @returns {string} El valor formateado.
+         */
+        function formatTotal(value) {
+            return new Intl.NumberFormat('es-MX', {
+                style: 'currency',
+                currency: 'MXN',
+                minimumFractionDigits: 0, 
+                maximumFractionDigits: 0, 
+            }).format(value);
+        }
+
+        /**
+         * Formatea una tasa (rate) en MXN CON 2 decimales.
+         * Usado para mostrar el costo efectivo por unidad.
+         * @param {number} value - La tasa a formatear.
+         * @returns {string} El valor formateado.
+         */
+        function formatRate(value) {
+             return new Intl.NumberFormat('es-MX', {
+                style: 'currency',
+                currency: 'MXN',
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+            }).format(value);
+        }
+
+        /**
+         * Calcula el máximo de stickers que caben en una planilla (18x26cm útil).
+         */
+        function calculateFitPerSheet(width, height) {
+            if (width <= 0 || height <= 0) return 0;
+
+            // Dimensiones con espaciado
+            const w_prime = width + STICKER_SPACING_CM;
+            const h_prime = height + STICKER_SPACING_CM;
+
+            // 1. Orientación Normal
+            const fit1_rows = Math.floor(CRICUT_USABLE_WIDTH_CM / w_prime);
+            const fit1_cols = Math.floor(CRICUT_USABLE_HEIGHT_CM / h_prime);
+            const fit1 = fit1_rows * fit1_cols;
+
+            // 2. Orientación Rotada 
+            const fit2_rows = Math.floor(CRICUT_USABLE_WIDTH_CM / h_prime);
+            const fit2_cols = Math.floor(CRICUT_USABLE_HEIGHT_CM / w_prime);
+            const fit2 = fit2_rows * fit2_cols;
+            
+            return Math.max(fit1, fit2);
+        }
+
+        /**
+         * Obtiene el costo total para una cantidad dada de planillas, aplicando la tarifa
+         * por material.
+         */
+        function getSheetTotalPrice(sheets, material) {
+            if (sheets <= 0) {
+                return 0;
+            } 
+
+            // RUTA 1: Sticker Clásico (Fotoglossy) - Usa el mapa de precios totales proporcionado
+            if (material === 'classic_glossy') {
+                if (sheets in CLASSIC_GLOSSY_PRICING_MAP) {
+                    return CLASSIC_GLOSSY_PRICING_MAP[sheets];
+                } 
+                // Tarifa de Mayoreo para 101+ planillas
+                if (sheets >= 101) {
+                    return sheets * CLASSIC_BULK_SHEET_RATE;
+                }
+            }
+            
+            // RUTA 2: Materiales Vinil
+            const isVinyl = VINYL_MATERIALS.includes(material);
+            if (isVinyl) {
+                // VINIL: TARIFA UNITARIA DE 1 A 19, Y BULK A PARTIR DE 20
+                if (sheets >= 20) {
+                    return sheets * VINYL_BULK_RATE; 
+                }
+                if (sheets in VINYL_UNIT_RATE_TABLE) {
+                    return sheets * VINYL_UNIT_RATE_TABLE[sheets];
+                }
+            }
+            
+            return 0;
+        }
+
+        /**
+         * Actualiza el enlace del botón de WhatsApp con la cotización actual.
+         * @param {number} totalPrice - Costo total de la cotización.
+         * @param {string} materialId - ID del material seleccionado.
+         */
+        function updateWhatsappLink(totalPrice, materialId) {
+            const materialName = MATERIAL_NAMES[materialId] || 'Material Desconocido';
+            const formattedPrice = formatTotal(totalPrice);
+            
+            // Número de WhatsApp del usuario
+            const whatsappNumber = '5216677809284'; 
+            
+            let message = '';
+            let isDtfPremium = (materialId === 'premium_dtf');
+
+            if (isDtfPremium) {
+                const length = parseFloat(document.getElementById('printed_length').value) || 0;
+                message = `¡Hola! Quiero confirmar mi pedido de stickers en Algo Special. La cotización es:\n\n*Material:* ${materialName}\n*Largo total cotizado:* ${length} CM\n*Precio Total Estimado:* ${formattedPrice}\n\nPor favor, ayúdame a finalizar la compra y enviar mis archivos.`;
+            } else {
+                const quantity = parseFloat(document.getElementById('quantity').value) || 0;
+                const width = parseFloat(document.getElementById('width').value) || 0;
+                const height = parseFloat(document.getElementById('height').value) || 0;
+                const sheets = document.getElementById('sheets-needed').textContent;
+                
+                message = `¡Hola! Quiero confirmar mi pedido de stickers en Algo Special. La cotización es:\n\n*Material:* ${materialName}\n*Cantidad de Stickers:* ${quantity}\n*Tamaño:* ${width}x${height} CM\n*Planillas Necesarias:* ${sheets}\n*Precio Total Estimado:* ${formattedPrice}\n\nPor favor, ayúdame a finalizar la compra y enviar mis archivos.`;
+            }
+
+            const encodedMessage = encodeURIComponent(message);
+            const whatsappLink = `https://wa.me/${whatsappNumber}?text=${encodedMessage}`;
+            
+            // Actualiza el botón principal de pedido
+            document.getElementById('order-button').href = whatsappLink;
+        }
+
+        
+        /**
+         * Cotiza para materiales clásicos (basado en área y cantidad).
+         */
+        function calculateAreaPrice() {
+            const material = document.getElementById('material').value; 
+            const quantityInput = document.getElementById('quantity').value;
+            const widthInput = document.getElementById('width').value;
+            const heightInput = document.getElementById('height').value;
+            
+            const quantity = parseFloat(quantityInput) || 0;
+            const width = parseFloat(widthInput) || 0;
+            const height = parseFloat(heightInput) || 0;
+            
+            const totalElement = document.getElementById('total-price');
+            const unitPriceContainer = document.getElementById('unit-price-container');
+            const unitPriceElement = document.getElementById('unit-price');
+            const unitPriceLabelElement = document.getElementById('unit-price-label');
+            
+            // Actualiza etiqueta a "Costo por planilla"
+            unitPriceContainer.style.display = 'flex';
+            unitPriceLabelElement.textContent = 'Costo por planilla (efectivo):';
+            
+            let totalCost = 0;
+            let effectiveRatePerSheet = 0;
+
+            if (quantity <= 0 || width <= 0 || height <= 0) {
+                totalElement.textContent = formatTotal(0);
+                document.getElementById('fit-per-sheet').textContent = 0;
+                document.getElementById('sheets-needed').textContent = 0;
+                unitPriceElement.textContent = formatRate(0);
+                updateWhatsappLink(0, material);
+                return;
+            }
+            
+            const fitPerSheet = calculateFitPerSheet(width, height);
+            
+            let sheetsNeeded = 0;
+            if (fitPerSheet > 0) {
+                sheetsNeeded = Math.ceil(quantity / fitPerSheet);
+            }
+            
+            if (fitPerSheet === 0) {
+                totalElement.textContent = formatTotal(0);
+                document.getElementById('fit-per-sheet').textContent = "¡Demasiado grande!";
+                document.getElementById('sheets-needed').textContent = "-";
+                unitPriceElement.textContent = formatRate(0);
+                updateWhatsappLink(0, material);
+                return;
+            }
+
+            totalCost = getSheetTotalPrice(sheetsNeeded, material);
+            
+            if (sheetsNeeded > 0 && totalCost > 0) {
+                 effectiveRatePerSheet = totalCost / sheetsNeeded;
+            }
+            
+            totalElement.textContent = formatTotal(totalCost);
+            document.getElementById('fit-per-sheet').textContent = fitPerSheet;
+            document.getElementById('sheets-needed').textContent = sheetsNeeded;
+            unitPriceElement.textContent = formatRate(effectiveRatePerSheet);
+            updateWhatsappLink(totalCost, material);
+        }
+        
+        /**
+         * Cotiza para Sticker Premium DTF UV (basado en largo total).
+         */
+        function calculateDtfPrice() {
+            const material = document.getElementById('material').value;
+            const printedLengthInput = document.getElementById('printed_length').value;
+            let printedLength = parseFloat(printedLengthInput) || 0;
+            
+            const totalElement = document.getElementById('total-price');
+            const unitPriceContainer = document.getElementById('unit-price-container');
+            const unitPriceElement = document.getElementById('unit-price');
+            const unitPriceLabelElement = document.getElementById('unit-price-label');
+
+            unitPriceContainer.style.display = 'flex';
+            unitPriceLabelElement.textContent = 'Costo por centímetro (efectivo):';
+
+            let totalPrice = 0;
+            
+            // FIX: Si la longitud es 0 o negativa, el precio debe ser $0.
+            if (printedLength <= 0) {
+                document.getElementById('dtf-pricing-note').classList.remove('text-primary', 'font-bold');
+                document.getElementById('dtf-pricing-note').textContent = 'El largo debe ser mayor a 0 cm.';
+                
+                totalElement.textContent = formatTotal(0);
+                unitPriceElement.textContent = formatRate(0); 
+                updateWhatsappLink(0, material);
+                return;
+            }
+
+
+            if (printedLength < MIN_DTF_LENGTH) {
+                const minCost = DTF_DISCRETE_PRICING_MAP[MIN_DTF_LENGTH] || 0;
+                
+                document.getElementById('dtf-pricing-note').classList.add('text-primary', 'font-bold'); 
+                document.getElementById('dtf-pricing-note').textContent = `El mínimo a cotizar es ${MIN_DTF_LENGTH} CM. Se aplicará el precio mínimo de ${formatTotal(minCost)}.`;
+                
+                totalPrice = minCost;
+                totalElement.textContent = formatTotal(totalPrice);
+                unitPriceElement.textContent = formatRate(0); 
+                updateWhatsappLink(totalPrice, material);
+                return;
+            }
+            
+            document.getElementById('dtf-pricing-note').classList.remove('text-primary', 'font-bold');
+            document.getElementById('dtf-pricing-note').textContent = ''; 
+
+
+            if (printedLength <= MAX_DISCRETE_CM) {
+                const cmLookup = Math.round(printedLength);
+                const discretePrice = DTF_DISCRETE_PRICING_MAP[cmLookup];
+                
+                if (discretePrice !== undefined) {
+                    totalPrice = discretePrice;
+                } else {
+                    const fallbackRate = (PRICE_AT_MAX_DISCRETE_CM / MAX_DISCRETE_CM);
+                    totalPrice = printedLength * fallbackRate;
+                }
+
+            } 
+            else {
+                totalPrice = printedLength * OVER_300_RATE_PER_CM;
+            }
+            
+            // REDONDEO AL ENTERO SUPERIOR
+            totalPrice = Math.ceil(totalPrice); 
+
+            let effectiveRate = 0;
+            if (printedLength > 0) {
+                effectiveRate = totalPrice / printedLength; 
+            }
+            
+            totalElement.textContent = formatTotal(totalPrice);
+            unitPriceElement.textContent = formatRate(effectiveRate); 
+            updateWhatsappLink(totalPrice, material);
+        }
+
+
+        /**
+         * Función principal que decide qué cotización usar.
+         */
+        window.calculateQuote = function() { // Exponemos la función al scope global para onchange
+            const material = document.getElementById('material').value;
+            const isDtfPremium = (material === 'premium_dtf');
+
+            // 1. Alternar visibilidad de inputs y opciones
+            document.getElementById('length-inputs').classList.toggle('hidden', !isDtfPremium);
+            document.getElementById('area-inputs').classList.toggle('hidden', isDtfPremium);
+            
+            // 2. Ejecutar la lógica de cotización adecuada
+            if (isDtfPremium) {
+                calculateDtfPrice();
+            } else {
+                calculateAreaPrice();
+            }
+        }
+
+        // Inicializar al cargar la ventana
+        window.onload = initializeFirebase;
+    </script>
+</body>
+</html>
