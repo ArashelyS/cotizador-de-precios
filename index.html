@@ -6,6 +6,8 @@
     <title>Algo Special | Cotizador</title>
     <!-- Carga de Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Librería para generar imagen del ticket -->
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <!-- Configuración de Tailwind para usar la fuente Inter y los nuevos colores -->
     <script>
         tailwind.config = {
@@ -27,6 +29,7 @@
         }
     </script>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
         body {
             font-family: 'Inter', sans-serif;
             /* Fondo ligeramente naranja con un toque de blanco */
@@ -52,22 +55,95 @@
             border-color: #FF1F9F !important;
             box-shadow: 0 0 0 3px rgba(255, 31, 159, 0.5) !important;
         }
-        input::-webkit-outer-spin-button,
-        input::-webkit-inner-spin-button {
-            -webkit-appearance: none;
-            margin: 0;
+        /* Estilos específicos para los botones AÑADIR A LA LISTA (Ahora Rosa) */
+        .add-to-list-button {
+            transition: transform 0.1s, box-shadow 0.1s, background-color 0.3s;
         }
-        /* Estilo base del botón de Pedido (Rosa Neón) */
-        #order-button {
-            transition: transform 0.1s, box-shadow 0.1s;
-        }
-        #order-button:hover {
+        .add-to-list-button:hover:not(:disabled) {
+            /* Sombra con efecto Neón Rosa */
             transform: translateY(-2px);
             box-shadow: 0 8px 15px rgba(255, 31, 159, 0.5); 
         }
-        #order-button:active {
+        .add-to-list-button:active:not(:disabled) {
             transform: translateY(0);
             box-shadow: 0 4px 10px rgba(255, 31, 159, 0.3);
+        }
+
+        /* Animación para el botón Agregar (cuando se añade algo) */
+        @keyframes pulse-secondary {
+            0%, 100% { background-color: #C1FF00; }
+            50% { background-color: #A3D900; }
+        }
+        .pulse-secondary-animation {
+            animation: pulse-secondary 1.5s infinite;
+        }
+
+        /* Estilos para el ticket */
+        .ticket {
+            width: 400px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            padding: 20px;
+            margin: 20px auto;
+            font-family: 'Inter', sans-serif;
+        }
+        .ticket-header {
+            text-align: center;
+            border-bottom: 2px dashed #FF1F9F;
+            padding-bottom: 15px;
+            margin-bottom: 15px;
+        }
+        .ticket-logo {
+            height: 60px;
+            margin: 0 auto 10px;
+        }
+        .ticket-title {
+            font-size: 18px;
+            font-weight: 800;
+            color: #FF1F9F;
+            margin-bottom: 5px;
+        }
+        .ticket-subtitle {
+            font-size: 14px;
+            color: #666;
+            font-style: italic;
+        }
+        .ticket-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .ticket-total {
+            display: flex;
+            justify-content: space-between;
+            font-weight: 800;
+            font-size: 18px;
+            padding: 15px 0;
+            border-top: 2px dashed #FF1F9F;
+            margin-top: 10px;
+        }
+        .ticket-footer {
+            text-align: center;
+            font-size: 12px;
+            color: #888;
+            margin-top: 15px;
+        }
+
+        /* Mejoras para móviles */
+        @media (max-width: 640px) {
+            .card {
+                padding: 1rem;
+            }
+            .grid-cols-2 {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+            .ticket {
+                width: 100%;
+                padding: 15px;
+            }
         }
     </style>
 </head>
@@ -75,84 +151,116 @@
 
     <div class="card bg-text-light w-full max-w-2xl p-8 rounded-2xl">
 
-        <!-- Logo integrado -->
+        <!-- Logo integrado (TAMAÑO AUMENTADO) -->
         <div class="mb-0 flex justify-center">
-            <img src="https://www.dropbox.com/scl/fi/xpobzj48hrvwrggk9w2iz/INSTAGRAM.png?rlkey=zcxxkd3uuj27nlbsiccynl6ju&raw=1" alt="Logo de Algo Special" class="h-40 sm:h-52 w-auto object-contain">
+             <img src="https://www.dropbox.com/scl/fi/xpobzj48hrvwrggk9w2iz/INSTAGRAM.png?rlkey=zcxxkd3uuj27nlbsiccynl6ju&st=aciec22s&dl=1" 
+                  alt="Logo de Algo Special" 
+                  class="h-40 sm:h-52 w-auto object-contain">
         </div>
         
         <!-- Título y Subtítulo -->
         <p class="text-center text-lg text-text-dark/80 mb-1 italic font-semibold">Transforma cada momento en una experiencia extraordinaria</p>
-        <p class="text-center text-2xl font-extrabold text-primary mb-8">COTIZA TUS STICKERS</p>
+        <p class="text-center text-2xl font-extrabold text-primary mb-8">COTIZA TU PEDIDO</p>
 
         <!-- Formulario de Entrada -->
         <div class="space-y-6">
             
-            <!-- Material -->
+            <!-- Producto (Antes Material) -->
             <div>
                 <div class="pt-4 px-5 pb-2 bg-secondary rounded-xl border-2 border-text-dark shadow-lg mb-2">
-                    <label for="material" class="block text-lg font-extrabold text-text-dark uppercase">ELIGE EL MATERIAL</label>
+                    <label for="material" class="block text-lg font-extrabold text-text-dark uppercase">ELIGE PRODUCTO</label>
                 </div>
                 
                 <select id="material" onchange="calculateQuote()"
                         class="mt-1 block w-full rounded-lg border-2 border-text-dark shadow-md p-3 bg-text-light focus:ring-primary focus:border-primary">
-                    <option value="premium_dtf" selected>Sticker Premium (DTF UV)</option>
-                    <option value="classic_glossy">Sticker Clásico (Adhesivo Fotoglossy)</option>
-                    <option value="vinyl_white">Sticker Vinil Impreso (Blanco)</option>
-                    <option value="vinyl_clear">Sticker Vinil Impreso (Transparente)</option>
+                    
+                    <!-- PRODUCTOS STICKERS -->
+                    <option value="premium_dtf" selected>STICKER PREMIUM (DTF UV)</option>
+                    <option value="classic_glossy">STICKER CLÁSICO (ADHESIVO FOTOGLOSSY)</option>
+                    <option value="vinyl_white">STICKER VINIL IMPRESO (BLANCO)</option>
+                    <option value="vinyl_clear">STICKER VINIL IMPRESO (TRANSPARENTE)</option>
+
+                    <!-- PRODUCTOS FIJOS SEPARADOS -->
+                    <option value="vaso">VASO PERSONALIZADO</option>
+                    <option value="mantelito">MANTELITO Ó SOBREPLATO</option>
+                    <option value="combo">COMBO (VASO + MANTELITO/SOBREPLATO)</option>
+
                 </select>
             </div>
             
-            <!-- INICIO: Contenedor para CALCULAR CENTÍMETROS NECESARIOS (CUADRO VERDE NUEVO) -->
-            <div id="dtf-calculator" class="space-y-4 pt-4 p-5 bg-secondary rounded-xl border-2 border-text-dark shadow-lg">
-                <p class="text-lg font-extrabold text-text-dark uppercase">CALCULADORA DE LARGO (DTF UV)</p>
-                <p class="text-sm text-text-dark/70 font-bold mb-4">Calcula el largo total que necesitas según la cantidad y tamaño de tus diseños.</p>
-                
-                <!-- Cantidad -->
-                <div>
-                    <label for="quantity_dtf" class="block text-base font-semibold text-text-dark mb-1">Cantidad de Stickers</label>
-                    <input type="number" id="quantity_dtf" value="100" min="1" oninput="calculateDtfLength()"
-                           class="mt-1 block w-full rounded-lg border-2 border-text-dark shadow-md p-3 bg-text-light focus:ring-primary focus:border-primary text-text-dark">
-                </div>
-
-                <!-- Tamaño (Ancho y Alto) -->
-                <div class="grid grid-cols-2 gap-4">
+            <!-- ========================================================= -->
+            <!-- INTERFAZ 1 - CÁLCULO DTF POR LARGO -->
+            <!-- ========================================================= -->
+            <div id="dtf-interface">
+                 <!-- Contenedor para CALCULAR CENTÍMETROS NECESARIOS (CUADRO VERDE NUEVO) -->
+                <div id="dtf-calculator" class="space-y-4 pt-4 p-5 bg-secondary rounded-xl border-2 border-text-dark shadow-lg mb-2">
+                    <p class="text-lg font-extrabold text-text-dark uppercase">CALCULADORA DE LARGO (DTF UV)</p>
+                    <p class="text-sm text-text-dark/70 font-bold mb-4">Calcula el largo total que necesitas según la cantidad y tamaño de tus diseños.</p>
+                    
+                    <!-- Cantidad -->
                     <div>
-                        <label for="width_dtf" class="block text-base font-semibold text-text-dark mb-1">Ancho (cm)</label>
-                        <input type="number" id="width_dtf" value="5" min="0.1" step="0.1" oninput="calculateDtfLength()"
+                        <label for="quantity_dtf" class="block text-base font-semibold text-text-dark mb-1">Cantidad de Stickers</label>
+                        <input type="number" id="quantity_dtf" value="100" min="1" oninput="calculateQuote()"
                                class="mt-1 block w-full rounded-lg border-2 border-text-dark shadow-md p-3 bg-text-light focus:ring-primary focus:border-primary text-text-dark">
                     </div>
-                    <div>
-                        <label for="height_dtf" class="block text-base font-semibold text-text-dark mb-1">Alto (cm)</label>
-                        <input type="number" id="height_dtf" value="5" min="0.1" step="0.1" oninput="calculateDtfLength()"
-                               class="mt-1 block w-full rounded-lg border-2 border-text-dark shadow-md p-3 bg-text-light focus:ring-primary focus:border-primary text-text-dark">
+
+                    <!-- Tamaño (Ancho y Alto) -->
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label for="width_dtf" class="block text-base font-semibold text-text-dark mb-1">Ancho (cm)</label>
+                            <input type="number" id="width_dtf" value="5" min="0.1" step="0.1" oninput="calculateQuote()"
+                                   class="mt-1 block w-full rounded-lg border-2 border-text-dark shadow-md p-3 bg-text-light focus:ring-primary focus:border-primary text-text-dark">
+                        </div>
+                        <div>
+                            <label for="height_dtf" class="block text-base font-semibold text-text-dark mb-1">Alto (cm)</label>
+                            <input type="number" id="height_dtf" value="5" min="0.1" step="0.1" oninput="calculateQuote()"
+                                   class="mt-1 block w-full rounded-lg border-2 border-text-dark shadow-md p-3 bg-text-light focus:ring-primary focus:border-primary text-text-dark">
+                        </div>
+                    </div>
+                    
+                    <!-- Resultado del Cálculo de Largo (Solo muestra el resultado) -->
+                    <div class="mt-4 pt-4 border-t border-text-dark/30">
+                        <p class="flex justify-between items-center">
+                            <span class="text-base font-extrabold text-text-dark">Centímetros Sugeridos:</span>
+                            <span id="calculated_length" class="font-extrabold text-primary text-2xl">0 CM</span>
+                        </p>
                     </div>
                 </div>
-                
-                <!-- Resultado del Cálculo de Largo -->
-                <div class="mt-4 pt-4 border-t border-text-dark/30">
-                    <p class="flex justify-between items-center">
-                        <span class="text-base font-extrabold text-text-dark">Centímetros Necesarios (Largo):</span>
-                        <span id="calculated_length" class="font-extrabold text-primary text-2xl">0 CM</span>
-                    </p>
+                <!-- Contenedor para cotización por LARGO (DTF UV - PRECIO) -->
+                <div id="length-inputs" class="space-y-4 pt-4 p-5 bg-secondary rounded-xl border-2 border-text-dark shadow-lg mt-6">
+                    <p class="text-lg font-extrabold text-text-dark uppercase">PRECIO FINAL POR LARGO</p>
+                    
+                    <!-- Largo Total -->
+                    <div class="mt-4 space-y-2">
+                        <label for="printed_length_direct" class="block text-base font-bold text-text-dark mb-1">Largo Final a Cotizar (cm)</label>
+                        <input type="number" id="printed_length_direct" value="380" min="0" step="1" oninput="calculateDtfPrice()"
+                               class="mt-1 block w-full rounded-lg border-2 border-text-dark shadow-md p-3 focus:ring-primary focus:border-primary text-text-dark">
+                        
+                        <!-- Sección de Resultados DTF (Unificado) -->
+                        <div class="mt-4 pt-4 border-t border-text-dark/30">
+                            <!-- Fila 1: TOTAL EN PESOS -->
+                            <div class="flex justify-between items-center bg-text-light p-3 rounded-lg border-2 border-text-dark shadow-md">
+                                <span class="text-base font-extrabold text-text-dark">TOTAL EN PESOS:</span>
+                                <span id="dtf-total-price" class="text-3xl font-extrabold text-primary">$0</span>
+                            </div>
+                            
+                            <!-- Fila 2: Costo por Centímetro (Efectivo) -->
+                            <div class="flex justify-between text-sm mt-2">
+                                <span class="text-text-dark/80 font-medium">COSTO POR CENTÍMETRO (Efectivo):</span> 
+                                <span id="dtf-unit-price" class="font-bold text-text-dark">$0.00 MXN</span>
+                            </div>
+                        </div>
+                        <!-- Botón para Agregar a la Lista -->
+                        <button id="add-to-list-dtf" onclick="addCurrentQuoteToList()" disabled 
+                                class="add-to-list-button mt-4 w-full py-3 font-extrabold text-text-light bg-primary rounded-lg border-2 border-text-dark shadow-xl disabled:bg-gray-300 disabled:text-gray-500 disabled:border-gray-500">
+                            AÑADIR A LA LISTA
+                        </button>
+                    </div>
                 </div>
             </div>
-            <!-- FIN: Contenedor para CALCULAR CENTÍMETROS NECESARIOS -->
-
-            <!-- Contenedor para cotización por LARGO (DTF UV - PRECIO) -->
-            <div id="length-inputs" class="space-y-4 pt-4 p-5 bg-secondary rounded-xl border-2 border-text-dark shadow-lg">
-                <p class="text-lg font-extrabold text-text-dark uppercase">COTIZACIÓN DTF POR LARGO TOTAL</p>
-                
-                <!-- Largo Total -->
-                <div class="mt-4 space-y-2">
-                    <label for="printed_length_direct" class="block text-base font-bold text-text-dark mb-1">Largo Total de Impresión (cm)</label>
-                    <input type="number" id="printed_length_direct" value="380" min="0" step="1" oninput="calculateQuote()"
-                           class="mt-1 block w-full rounded-lg border-2 border-text-dark shadow-md p-3 focus:ring-primary focus:border-primary text-text-dark">
-                    <p id="dtf-pricing-note" class="text-sm text-text-dark/70 mt-2"></p>
-                </div>
-            </div>
-            <!-- FIN SECCIÓN DTF -->
-
-            <!-- Contenedor para cotización por ÁREA/CANTIDAD (Otros materiales) -->
+            <!-- ========================================================= -->
+            <!-- INTERFAZ 2 - CÁLCULO POR ÁREA/PLANILLAS (Stickers Clásicos/Vinil) -->
+            <!-- ========================================================= -->
             <div id="area-inputs" class="space-y-6 hidden">
                 
                 <div class="space-y-4 pt-4 p-5 bg-secondary rounded-xl border-2 border-text-dark shadow-lg">
@@ -161,26 +269,27 @@
                     <!-- Cantidad -->
                     <div>
                         <label for="quantity" class="block text-base font-semibold text-text-dark mb-1">Cantidad de Stickers</label>
-                        <input type="number" id="quantity" value="100" min="1" oninput="calculateQuote()"
+                        <input type="number" id="quantity" value="100" min="1" oninput="calculateAreaPrice()"
                                class="mt-1 block w-full rounded-lg border-2 border-text-dark shadow-md p-3 bg-text-light focus:ring-primary focus:border-primary text-text-dark">
-                        <p class="text-xs text-text-dark/70 mt-1">La planilla es tamaño Oficio</p>
+                        <p class="text-xs text-text-dark/70 mt-1">La planilla es tamaño Oficio (18x26 cm útil).</p>
                     </div>
 
                     <!-- Tamaño (Ancho y Alto) -->
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label for="width" class="block text-base font-semibold text-text-dark mb-1">Ancho (cm)</label>
-                            <input type="number" id="width" value="5" min="1" step="0.1" oninput="calculateQuote()"
+                            <input type="number" id="width" value="5" min="1" step="0.1" oninput="calculateAreaPrice()"
                                    class="mt-1 block w-full rounded-lg border-2 border-text-dark shadow-md p-3 bg-text-light focus:ring-primary focus:border-primary text-text-dark">
                         </div>
                         <div>
                             <label for="height" class="block text-base font-semibold text-text-dark mb-1">Alto (cm)</label>
-                            <input type="number" id="height" value="5" min="1" step="0.1" oninput="calculateQuote()"
+                            <input type="number" id="height" value="5" min="1" step="0.1" oninput="calculateAreaPrice()"
                                    class="mt-1 block w-full rounded-lg border-2 border-text-dark shadow-md p-3 bg-text-light focus:ring-primary focus:border-primary text-text-dark">
                         </div>
                     </div>
                 </div>
-                <!-- Detalle de Planillas -->
+                
+                <!-- Detalle de Planillas y Resultados -->
                 <div class="space-y-2 pt-4 p-5 bg-secondary rounded-xl border-2 border-text-dark shadow-lg">
                     <p class="text-lg font-extrabold text-text-dark uppercase">DETALLE DE PRODUCCIÓN</p>
                     <div id="cricut-details" class="text-base text-text-dark">
@@ -194,67 +303,169 @@
                         </p>
                     </div>
                     <p class="text-xs text-text-dark/70 pt-1 font-bold text-primary">Pedido menores a 5 planillas no incluyen diseño.</p>
-                </div>
-            </div>
-        </div>
 
-        <!-- Resultados de la Cotización -->
-        <div class="mt-8 border-t-2 border-text-dark pt-6">
-            <h2 class="text-xl font-extrabold text-text-dark mb-4">RESULTADO DE LA COTIZACIÓN</h2>
-            
-            <div class="space-y-3">
-                <!-- Precio Total -->
-                <div class="flex justify-between items-center bg-secondary p-5 rounded-xl border-2 border-text-dark shadow-lg">
-                    <span class="text-xl font-extrabold text-text-dark">PRECIO TOTAL ESTIMADO:</span>
-                    <span id="total-price" class="text-4xl font-extrabold text-primary">$1,400</span>
-                </div>
-
-                <!-- Detalles de la Cotización -->
-                <div class="bg-text-light p-4 rounded-lg text-base space-y-2 border border-primary/50">
-                    <div id="unit-price-container" class="flex justify-between">
-                        <span id="unit-price-label" class="text-text-dark/80">Costo por centímetro:</span> 
-                        <span id="unit-price" class="font-bold text-text-dark">$3.70 MXN</span>
+                    <!-- Sección de Resultados Área (Unificado) -->
+                    <div class="mt-4 pt-4 border-t border-text-dark/30">
+                         <!-- Fila 1: TOTAL EN PESOS (Planilla) -->
+                        <div class="flex justify-between items-center bg-text-light p-3 rounded-lg border-2 border-text-dark shadow-md">
+                            <span class="text-base font-extrabold text-text-dark">TOTAL EN PESOS:</span>
+                            <span id="area-total-price" class="text-3xl font-extrabold text-primary">$0</span>
+                        </div>
+                        
+                        <!-- Fila 2: Costo por Planilla -->
+                        <div class="flex justify-between text-sm mt-2">
+                            <span class="text-text-dark/80 font-medium">COSTO POR PLANILLA:</span> 
+                            <span id="area-unit-price" class="font-bold text-text-dark">$0.00 MXN</span>
+                        </div>
                     </div>
+                    
+                    <!-- Botón para Agregar a la Lista -->
+                    <button id="add-to-list-area" onclick="addCurrentQuoteToList()" disabled 
+                            class="add-to-list-button mt-4 w-full py-3 font-extrabold text-text-light bg-primary rounded-lg border-2 border-text-dark shadow-xl disabled:bg-gray-300 disabled:text-gray-500 disabled:border-gray-500">
+                        AÑADIR A LA LISTA
+                    </button>
                 </div>
             </div>
-            
+            <!-- ========================================================= -->
+            <!-- INTERFAZ 3 - PRODUCTOS DE PRECIO FIJO (UNIFICADO en un solo cuadro) -->
+            <!-- ========================================================= -->
+            <div id="product-inputs" class="space-y-6 hidden">
+                
+                <!-- Contenedor Único para Vasos/Productos Fijos (Cuadro 'verde') -->
+                <div class="space-y-4 pt-4 p-5 bg-secondary rounded-xl border-2 border-text-dark shadow-lg">
+                    
+                    <!-- Select para Tipo de Vaso (Solo si es Vaso/Combo) -->
+                    <div id="vaso-type-container" class="hidden space-y-2">
+                         <label for="select-vaso" class="block text-base font-semibold text-text-dark mb-1">TIPO DE VASO</label>
+                        <select id="select-vaso" onchange="calculateFixedPrice()"
+                                class="mt-1 block w-full rounded-lg border-2 border-text-dark shadow-md p-3 bg-text-light focus:ring-primary focus:border-primary">
+                            <!-- Opciones se llenan dinámicamente -->
+                        </select>
+                    </div>
+
+                    <!-- Select para Tipo de Mantelito (Solo si es Mantelito) -->
+                    <div id="mantelito-type-container" class="hidden space-y-2">
+                        <label for="select-mantelito" class="block text-base font-semibold text-text-dark mb-1">TIPO DE MANTELITO/SOBREPLATO</label>
+                        <select id="select-mantelito" onchange="calculateFixedPrice()"
+                                class="mt-1 block w-full rounded-lg border-2 border-text-dark shadow-md p-3 bg-text-light focus:ring-primary focus:border-primary">
+                            
+                            <!-- TIPOS DE MANTELITO/SOBREPLATO -->
+                            <option value="carta">MANTELITO CARTA</option>
+                            <option value="redondo">SOBREPLATO REDONDO</option>
+                            <option value="silueta">SOBREPLATO SILUETA</option>
+                            <option value="media_carta">SOBREPLATO MEDIA CARTA</option>
+                        </select>
+                    </div>
+
+                    <!-- Cantidad -->
+                    <div>
+                        <label for="quantity_product" class="block text-base font-semibold text-text-dark mb-1">CANTIDAD DE UNIDADES</label>
+                        <input type="number" id="quantity_product" value="10" min="1" placeholder="Ej: 50" oninput="calculateFixedPrice()"
+                               class="mt-1 block w-full rounded-lg border-2 border-text-dark shadow-md p-3 bg-text-light focus:ring-primary focus:border-primary text-text-dark">
+                    </div>
+
+                    <!-- Resultado de Productos Fijos (Total en Pesos / Costo por Unidad) -->
+                    <div class="space-y-2 pt-4 border-t border-text-dark/30">
+                        <!-- Fila 1: TOTAL EN PESOS -->
+                        <div class="flex justify-between items-center bg-text-light p-3 rounded-lg border-2 border-text-dark shadow-md">
+                            <span class="text-base font-extrabold text-text-dark">TOTAL EN PESOS:</span>
+                            <span id="product-total-price" class="text-3xl font-extrabold text-primary">$0</span>
+                        </div>
+                        
+                        <!-- Fila 2: Costo por Unidad -->
+                        <div class="flex justify-between text-sm mt-2">
+                            <span class="text-text-dark/80 font-medium">COSTO POR UNIDAD:</span> 
+                            <span id="product-unit-price" class="font-bold text-text-dark">$0.00 MXN</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Botón para Agregar a la Lista -->
+                    <button id="add-to-list-product" onclick="addCurrentQuoteToList()" disabled 
+                            class="add-to-list-button mt-4 w-full py-3 font-extrabold text-text-light bg-primary rounded-lg border-2 border-text-dark shadow-xl disabled:bg-gray-300 disabled:text-gray-500 disabled:border-gray-500">
+                        AÑADIR A LA LISTA
+                    </button>
+                </div>
+            </div>
+            <!-- ========================================================= -->
+            <!-- FIN: INTERFAZ 3 - PRODUCTOS DE PRECIO FIJO -->
+            <!-- ========================================================= -->
+
         </div>
 
-        <!-- Botón de Pedido -->
-        <div class="mt-6 flex w-full justify-center">
+        <!-- INICIO: Lista de Productos y Total -->
+        <div class="mt-8 pt-6 border-t-2 border-text-dark">
+            <h2 class="text-xl font-extrabold text-text-dark mb-4">TU LISTA DE PRODUCTOS</h2>
+            
+            <!-- Contenedor de la lista -->
+            <div id="quote-list" class="space-y-3 p-4 bg-gray-50 rounded-xl border-2 border-gray-300 min-h-[50px]">
+                <p id="empty-list-message" class="text-center text-gray-500 italic">La lista está vacía.</p>
+            </div>
+            
+            <!-- Total a Pagar -->
+            <div class="mt-4 flex justify-between items-center bg-text-dark text-text-light p-5 rounded-xl border-2 border-primary shadow-lg">
+                <span class="text-2xl font-extrabold">TOTAL A PAGAR:</span>
+                <span id="final-total" class="text-4xl font-extrabold text-secondary">$0</span>
+            </div>
+        </div>
+        <!-- FIN: Lista de Productos y Total -->
+
+        <!-- Botones de Acción -->
+        <div class="mt-6 flex flex-col sm:flex-row gap-4 w-full justify-center">
+            <button id="generate-ticket-btn" onclick="generateTicket()" disabled
+                    class="flex items-center justify-center w-full py-4 text-xl font-extrabold text-text-light bg-accent rounded-lg border-2 border-text-dark shadow-xl hover:bg-accent/80 focus:outline-none focus:ring-4 focus:ring-accent/50 disabled:bg-gray-300 disabled:text-gray-500 disabled:border-gray-500">
+                <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                </svg>
+                <span>DESCARGAR COTIZACIÓN</span>
+            </button>
+            
             <a id="order-button" 
                href="#" 
                target="_blank" 
                class="flex items-center justify-center w-full py-4 text-xl font-extrabold text-text-light bg-primary rounded-lg border-2 border-text-dark shadow-xl hover:bg-primary/80 focus:outline-none focus:ring-4 focus:ring-primary/50">
-                
-                <span>CONFIRMA TU PEDIDO AQUÍ</span>
+                <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                </svg>
+                <span>CONFIRMAR PEDIDO</span>
             </a>
+        </div>
+        
+        <!-- Ticket oculto para generar imagen -->
+        <div id="ticket-container" class="fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+            <div class="bg-white p-6 rounded-xl max-w-md w-full mx-4">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-bold text-text-dark">Vista Previa del Ticket</h3>
+                    <button onclick="closeTicketPreview()" class="text-gray-500 hover:text-gray-700">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+                <div id="ticket-preview" class="ticket mb-4">
+                    <!-- El contenido del ticket se genera aquí -->
+                </div>
+                <div class="flex justify-between">
+                    <button onclick="closeTicketPreview()" class="px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400">Cancelar</button>
+                    <button onclick="downloadTicket()" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/80">Descargar</button>
+                </div>
+            </div>
         </div>
         
     </div>
 
-    <!-- JavaScript para el cálculo de la cotización y Firebase -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+    <!-- JavaScript para el cálculo de la cotización -->
+    <script>
         
-        // --- Variables Globales de Firebase (PROPORCIONADAS POR EL ENTORNO) ---
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
-        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
-        
-        let app;
-        let db;
-        let auth;
-        let userId = null;
-
         const MIN_DTF_LENGTH = 10; 
         
+        // --- VARIABLE GLOBAL PARA EL CARRITO ---
+        let quoteList = [];
+
         // ======================================================================
-        // A. CONSTANTES DE PRECIOS
+        // A. CONSTANTES DE PRECIOS 
         // ======================================================================
 
+        // 1. Precios de Planillas y DTF
         const CLASSIC_GLOSSY_PRICING_MAP = {
             1: 25, 2: 50, 3: 75, 4: 100, 
             5: 90, 6: 108, 7: 126, 8: 144, 9: 162, 10: 180, 11: 198, 12: 216, 13: 234, 14: 252, 15: 270, 16: 288, 17: 306, 18: 324, 19: 335, 20: 340,
@@ -265,70 +476,243 @@
             61: 915, 62: 930, 63: 945, 64: 960, 65: 975, 66: 990, 67: 1005, 68: 1020, 69: 1035, 70: 1050,
             71: 1065, 72: 1080, 73: 1095, 74: 1110, 75: 1125, 76: 1140, 77: 1155, 78: 1170, 79: 1185, 80: 1200,
             81: 1215, 82: 1230, 83: 1245, 84: 1260, 85: 1275, 86: 1290, 87: 1305, 88: 1320, 89: 1335, 90: 1337,
-            91: 1339, 92: 1339, 93: 1340, 94: 1344, 95: 1359, 96: 1373, 97: 1387, 98: 1392, 99: 1395, 100: 1400
+            91: 1339, 92: 1339, 93: 1340, 94: 1344, 95: 1359, 96: 1373, 97: 1387, 98: 1392, 99: 1395, 100: 1400,
+            // (La tarifa BULK se usará para valores > 100)
         };
         const CLASSIC_BULK_SHEET_RATE = 14.00; 
+        
         const VINYL_UNIT_RATE_TABLE = {
             1: 35, 2: 35, 3: 35, 4: 35, 5: 33, 6: 33, 7: 32, 8: 32, 9: 30, 10: 30,
             11: 29, 12: 29, 13: 28, 14: 28, 15: 27, 16: 27, 17: 27, 18: 26, 19: 26
         };
         const VINYL_BULK_RATE = 25; 
         const VINYL_MATERIALS = ['vinyl_white', 'vinyl_clear'];
-        const DTF_DISCRETE_PRICING_MAP = {
+        const PLANILLA_MATERIALS = ['classic_glossy', ...VINYL_MATERIALS];
+
+        // NUEVOS PRECIOS DTF UV
+        const DTF_PRICE_TABLE = {
             10: 70, 11: 77, 12: 84, 13: 91, 14: 98, 15: 105, 16: 112, 17: 119, 18: 126, 19: 133,
-            20: 135, 21: 137, 22: 137, 23: 138, 24: 138, 25: 140, 26: 146, 27: 151, 28: 157, 29: 162,
-            30: 168, 31: 174, 32: 179, 33: 185, 34: 190, 35: 196, 36: 202, 37: 207, 38: 213, 39: 215,
+            20: 135, 21: 137, 22: 137, 23: 138, 24: 138, 25: 140, 26: 145.6, 27: 151.2, 28: 156.8, 29: 162.4,
+            30: 168, 31: 173.6, 32: 179.2, 33: 184.8, 34: 190.4, 35: 196, 36: 201.6, 37: 207.2, 38: 212.8, 39: 215,
             40: 215, 41: 215, 42: 215, 43: 217, 44: 217, 45: 217, 46: 217, 47: 219, 48: 219, 49: 219,
-            50: 220, 51: 224, 52: 229, 53: 233, 54: 238, 55: 242, 56: 246, 57: 251, 58: 255, 59: 260,
-            60: 264, 61: 268, 62: 273, 63: 277, 64: 282, 65: 286, 66: 290, 67: 295, 68: 299, 69: 304,
-            70: 308, 71: 312, 72: 317, 73: 321, 74: 326, 75: 330, 76: 334, 77: 339, 78: 343, 79: 348,
-            80: 352, 81: 356, 82: 361, 83: 365, 84: 370, 85: 374, 86: 378, 87: 383, 88: 385, 89: 385,
-            90: 385, 91: 385, 92: 387, 93: 387, 94: 387, 95: 387, 96: 389, 97: 389, 98: 389, 99: 389,
-            100: 390, 101: 394, 102: 398, 103: 402, 104: 406, 105: 410, 106: 413, 107: 417, 108: 421, 109: 425,
-            110: 429, 111: 433, 112: 437, 113: 441, 114: 445, 115: 449, 116: 452, 117: 456, 118: 460, 119: 464,
-            120: 468, 121: 472, 122: 476, 123: 480, 124: 484, 125: 488, 126: 491, 127: 495, 128: 499, 129: 503,
-            130: 507, 131: 511, 132: 515, 133: 519, 134: 523, 135: 527, 136: 530, 137: 534, 138: 538, 139: 542,
-            140: 546, 141: 550, 142: 554, 143: 558, 144: 562, 145: 566, 146: 569, 147: 573, 148: 577, 149: 581,
-            150: 585, 151: 589, 152: 593, 153: 597, 154: 601, 155: 605, 156: 608, 157: 612, 158: 616, 159: 620,
-            160: 624, 161: 628, 162: 632, 163: 636, 164: 640, 165: 644, 166: 647, 167: 651, 168: 655, 169: 659,
-            170: 663, 171: 667, 172: 671, 173: 675, 174: 679, 175: 683, 176: 686, 177: 690, 178: 694, 179: 698,
-            180: 702, 181: 706, 182: 710, 183: 714, 184: 718, 185: 722, 186: 725, 187: 729, 188: 733, 189: 737,
-            190: 741, 191: 745, 192: 749, 193: 753, 194: 757, 195: 761, 196: 764, 197: 768, 198: 772, 199: 776,
-            200: 780, 201: 784, 202: 788, 203: 792, 204: 796, 205: 800, 206: 803, 207: 807, 208: 811, 209: 815,
-            210: 819, 211: 823, 212: 827, 213: 831, 214: 835, 215: 839, 216: 842, 217: 846, 218: 850, 219: 854,
-            220: 858, 221: 862, 222: 866, 223: 870, 224: 874, 225: 878, 226: 881, 227: 885, 228: 889, 229: 893,
-            230: 897, 231: 901, 232: 905, 233: 909, 234: 913, 235: 917, 236: 920, 237: 924, 238: 928, 239: 932,
-            240: 936, 241: 940, 242: 944, 243: 948, 244: 952, 245: 956, 246: 959, 247: 963, 248: 967, 249: 971,
-            250: 975, 251: 979, 252: 983, 253: 987, 254: 991, 255: 995, 256: 998, 257: 1002, 258: 1006, 259: 1010,
-            260: 1014, 261: 1018, 262: 1022, 263: 1026, 264: 1030, 265: 1034, 266: 1037, 267: 1041, 268: 1045, 269: 1049,
-            270: 1053, 271: 1057, 272: 1061, 273: 1065, 274: 1069, 275: 1073, 276: 1076, 277: 1080, 278: 1084, 279: 1088,
-            280: 1092, 281: 1096, 282: 1100, 283: 1104, 284: 1106, 285: 1106, 286: 1106, 287: 1106, 288: 1107, 289: 1107,
-            290: 1107, 291: 1107, 292: 1107, 293: 1108, 294: 1108, 295: 1108, 296: 1108, 297: 1109, 298: 1109, 299: 1109
+            50: 220, 51: 224.4, 52: 228.8, 53: 233.2, 54: 237.6, 55: 242, 56: 246.4, 57: 250.8, 58: 255.2, 59: 259.6,
+            60: 264, 61: 268.4, 62: 272.8, 63: 277.2, 64: 281.6, 65: 286, 66: 290.4, 67: 294.8, 68: 299.2, 69: 303.6,
+            70: 308, 71: 312.4, 72: 316.8, 73: 321.2, 74: 325.6, 75: 330, 76: 334.4, 77: 338.8, 78: 343.2, 79: 347.6,
+            80: 352, 81: 356.4, 82: 360.8, 83: 365.2, 84: 369.6, 85: 374, 86: 378.4, 87: 382.8, 88: 385, 89: 385,
+            90: 385, 91: 385, 92: 387, 93: 387, 94: 387, 95: 387, 96: 389, 97: 389, 98: 389, 99: 389
         };
-        const MAX_DISCRETE_CM = 299;
-        const PRICE_AT_MAX_DISCRETE_CM = DTF_DISCRETE_PRICING_MAP[MAX_DISCRETE_CM] || 0; 
-        const OVER_300_RATE_PER_CM = 3.70; 
+        const DTF_RATE_100_299 = 3.9; 
+        const DTF_RATE_300_PLUS = 3.7; 
 
+        // 2. Precios de Productos Fijos
+        // TABLA DE PRECIOS DE MANTELITOS/SOBREPLATOS
+        const MANTELITO_PRICING = {
+            'carta': [
+                { max: 19, price: 14 },
+                { max: 49, price: 12 },
+                { max: 99, price: 10 },
+                { max: Infinity, price: 9 } 
+            ],
+            'redondo': [
+                { max: 19, price: 14 },
+                { max: 49, price: 12 },
+                { max: 99, price: 10 },
+                { max: Infinity, price: 9 }
+            ],
+            'silueta': [
+                { max: 19, price: 15 },
+                { max: 49, price: 14 },
+                { max: 99, price: 13 },
+                { max: Infinity, price: 11 } 
+            ],
+            'media_carta': [
+                { max: 19, price: 12 },
+                { max: 49, price: 10 },
+                { max: 99, price: 9 },
+                { max: Infinity, price: 7 } 
+            ]
+        };
 
+        // NUEVOS PRECIOS DE COMBOS
+        const COMBO_PRICING = {
+            'combo_cilindro_chupon': [
+                { max: 24, price: 35 },
+                { max: Infinity, price: 30 }
+            ],
+            'combo_cilindro_popote': [
+                { max: 24, price: 37 },
+                { max: Infinity, price: 30 }
+            ],
+            'combo_vaso_popote_16oz': [
+                { max: 24, price: 50 },
+                { max: Infinity, price: 45 }
+            ],
+            'combo_vaso_popote_24oz': [
+                { max: 24, price: 65 },
+                { max: Infinity, price: 55 }
+            ],
+            'combo_vaso_vip': [
+                { max: 5, price: 145 },
+                { max: Infinity, price: 130 }
+            ]
+        };
+
+        // Función auxiliar para obtener el precio del vaso basado en la cantidad
+        function getVasoPriceByQuantity(vasoKey, quantity) {
+            const pricing = {
+                'cilindro_chupon': [
+                    { max: 29, price: 19.00 },
+                    { max: 49, price: 18.50 },
+                    { max: 99, price: 18.00 },
+                    { max: Infinity, price: 17.50 }
+                ],
+                'cilindro_popote': [
+                    { max: 29, price: 23.00 },
+                    { max: 49, price: 22.50 },
+                    { max: 99, price: 22.00 },
+                    { max: Infinity, price: 21.00 }
+                ],
+                'vaso_popote_16oz': [
+                    { max: 29, price: 35.00 },
+                    { max: 49, price: 33.00 },
+                    { max: 99, price: 30.00 },
+                    { max: Infinity, price: 28.00 }
+                ],
+                'vaso_popote_24oz': [
+                    { max: 29, price: 50.00 },
+                    { max: 49, price: 45.00 },
+                    { max: 99, price: 42.00 },
+                    { max: Infinity, price: 40.00 }
+                ],
+                'vaso_vip': [ // VASO VIP (cristal popote)
+                    { max: 5, price: 130.00 },
+                    { max: 10, price: 120.00 },
+                    { max: Infinity, price: 110.00 } 
+                ]
+            };
+
+            const tiers = pricing[vasoKey] || [];
+            if (quantity <= 0) return 0;
+            
+            for (const tier of tiers) {
+                if (quantity <= tier.max) {
+                    return tier.price;
+                }
+            }
+            return 0; 
+        }
+
+        // Función auxiliar para obtener el precio del mantelito 
+        function getMantelitoPrice(mantelitoKey, quantity) {
+            const pricingTiers = MANTELITO_PRICING[mantelitoKey];
+            if (!pricingTiers || quantity <= 0) return 0;
+            
+            for (const tier of pricingTiers) {
+                if (quantity <= tier.max) {
+                    return tier.price;
+                }
+            }
+            return 0; 
+        }
+
+        // NUEVA FUNCIÓN para obtener el precio del combo
+        function getComboPrice(comboKey, quantity) {
+            const pricingTiers = COMBO_PRICING[comboKey];
+            if (!pricingTiers || quantity <= 0) return 0;
+            
+            for (const tier of pricingTiers) {
+                if (quantity <= tier.max) {
+                    return tier.price;
+                }
+            }
+            return 0; 
+        }
+
+        // Definición de estructura para PRODUCT_PRICES 
+        const PRODUCT_PRICES = {
+            'mantelito': { 
+                'carta': { name: 'MANTELITO CARTA', key: 'carta', baseUnit: 'UNIDAD' }, 
+                'redondo': { name: 'SOBREPLATO REDONDO', key: 'redondo', baseUnit: 'UNIDAD' }, 
+                'silueta': { name: 'SOBREPLATO SILUETA', key: 'silueta', baseUnit: 'UNIDAD' }, 
+                'media_carta': { name: 'SOBREPLATO MEDIA CARTA', key: 'media_carta', baseUnit: 'UNIDAD' } 
+            }, 
+            
+            'vaso': { 
+                'cilindro_chupon': { name: 'CILINDRO CHUPÓN', key: 'cilindro_chupon', baseUnit: 'UNIDAD' }, 
+                'cilindro_popote': { name: 'CILINDRO POPOTE', key: 'cilindro_popote', baseUnit: 'UNIDAD' }, 
+                'vaso_popote_16oz': { name: 'VASO POPOTE 16 OZ', key: 'vaso_popote_16oz', baseUnit: 'UNIDAD' }, 
+                'vaso_popote_24oz': { name: 'VASO POPOTE 24 OZ', key: 'vaso_popote_24oz', baseUnit: 'UNIDAD' }, 
+                'vaso_vip': { name: 'VASO VIP (CRISTAL POPOTE)', key: 'vaso_vip', baseUnit: 'UNIDAD' } 
+            },
+
+            // --- PRODUCTOS COMBO ACTUALIZADOS PARA LA INTERFAZ DE VENTA ---
+            'combo': {
+                'combo_cilindro_chupon': { 
+                    name: 'COMBO CILINDRO CHUPÓN', 
+                    key: 'combo_cilindro_chupon', 
+                    baseUnit: 'COMBO',
+                }, 
+                'combo_cilindro_popote': { 
+                    name: 'COMBO CILINDRO POPOTE', 
+                    key: 'combo_cilindro_popote', 
+                    baseUnit: 'COMBO',
+                }, 
+                'combo_vaso_popote_16oz': { 
+                    name: 'COMBO VASO POPOTE 16 OZ', 
+                    key: 'combo_vaso_popote_16oz', 
+                    baseUnit: 'COMBO',
+                }, 
+                'combo_vaso_popote_24oz': { 
+                    name: 'COMBO VASO POPOTE 24 OZ', 
+                    key: 'combo_vaso_popote_24oz', 
+                    baseUnit: 'COMBO',
+                }, 
+                'combo_vaso_vip': { 
+                    name: 'COMBO VASO VIP (CRISTAL POPOTE)', 
+                    key: 'combo_vaso_vip', 
+                    baseUnit: 'COMBO',
+                } 
+            }
+        };
+
+        const FIXED_PRODUCTS = ['vaso', 'mantelito', 'combo'];
+        
         // ======================================================================
-        // B. LÓGICA DE COTIZACIÓN Y UI
+        // B. CONSTANTES DE CÁLCULO Y NOMBRES
         // ======================================================================
 
+        // NOMBRES CLAROS PARA LA LISTA DE PRODUCTOS
+        const MATERIAL_NAMES = {
+            'premium_dtf': 'IMPRESIÓN DTF UV', 
+            'classic_glossy': 'STICKER CLÁSICO',
+            'vinyl_white': 'VINIL IMPRESO BLANCO',
+            'vinyl_clear': 'VINIL IMPRESO TRANSPARENTE',
+            'vaso': 'VASO PERSONALIZADO', 
+            'mantelito': 'MANTELITO/SOBREPLATO', 
+            'combo': 'COMBO VASO + MANTELITO' 
+        };
+        
+        // Constantes de cálculo para Planillas (Área)
         const CRICUT_USABLE_WIDTH_CM = 18; 
         const CRICUT_USABLE_HEIGHT_CM = 26; 
         const STICKER_SPACING_CM = 0.3; 
         
-        // C. NUEVA LÓGICA: CONSTANTES DE CÁLCULO DTF
+        // Constantes de cálculo para DTF
         const DTF_FIXED_WIDTH_CM = 28;
-        const DTF_SPACING_CM = 0.4; // 4 mm
+        const DTF_SPACING_CM = 0.4; 
 
-        const MATERIAL_NAMES = {
-            'premium_dtf': 'Sticker Premium (DTF UV)',
-            'classic_glossy': 'Sticker Clásico (Adhesivo Fotoglossy)',
-            'vinyl_white': 'Sticker Vinil Impreso (Blanco)',
-            'vinyl_clear': 'Sticker Vinil Impreso (Transparente)'
+        let currentQuoteData = {
+            material: 'premium_dtf',
+            name: MATERIAL_NAMES['premium_dtf'],
+            price: 0,
+            quantity: 0,
+            unit_type: 'CM', 
+            details: '',
         };
 
+        // ======================================================================
+        // C. FUNCIONES DE FORMATO
+        // ======================================================================
         function formatTotal(value) {
             return new Intl.NumberFormat('es-MX', {
                 style: 'currency',
@@ -347,8 +731,14 @@
             }).format(value);
         }
 
-        // --- CÁLCULO DE LARGO DTF (NUEVA FUNCIÓN - ACCESIBLE GLOBALMENTE) ---
-        window.calculateDtfLength = function() {
+        // ======================================================================
+        // D. LÓGICA DE CÁLCULO DTF Y ÁREA
+        // ======================================================================
+
+        /**
+         * Calcula el largo total sugerido en CM para DTF
+         */
+        function calculateDtfLength() {
             const quantity = parseFloat(document.getElementById('quantity_dtf').value) || 0;
             const width = parseFloat(document.getElementById('width_dtf').value) || 0;
             const height = parseFloat(document.getElementById('height_dtf').value) || 0;
@@ -356,60 +746,127 @@
 
             if (quantity <= 0 || width <= 0 || height <= 0) {
                 resultElement.textContent = '0 CM';
-                return;
+                return 0;
             }
 
-            // Dimensiones efectivas incluyendo la separación de 0.4 cm (4 mm)
             const w_effective = width + DTF_SPACING_CM;
             const h_effective = height + DTF_SPACING_CM;
 
-            // --- Opción 1: Diseño Normal (W a lo ancho, H a lo largo) ---
+            // Opción 1: Diseño orientado por ancho original
             const fit_per_row_1 = Math.floor(DTF_FIXED_WIDTH_CM / w_effective);
             let total_length_1 = Infinity;
-
             if (fit_per_row_1 > 0) {
                 const rows_needed_1 = Math.ceil(quantity / fit_per_row_1);
-                // El largo total es la suma de las alturas de las filas
                 total_length_1 = rows_needed_1 * h_effective;
             }
 
-            // --- Opción 2: Diseño Rotado (H a lo ancho, W a lo largo) ---
+            // Opción 2: Diseño orientado por alto original (rotado 90 grados)
             const fit_per_row_2 = Math.floor(DTF_FIXED_WIDTH_CM / h_effective);
             let total_length_2 = Infinity;
-
             if (fit_per_row_2 > 0) {
                 const rows_needed_2 = Math.ceil(quantity / fit_per_row_2);
-                // El largo total es la suma de los anchos de los diseños rotados
                 total_length_2 = rows_needed_2 * w_effective;
             }
             
-            // Seleccionar el largo mínimo (el más eficiente)
             const finalLength = Math.min(total_length_1, total_length_2);
 
-            if (finalLength === Infinity) {
+            if (finalLength === Infinity || finalLength === 0) {
                 resultElement.textContent = 'ERROR (Muy grandes)';
-                return;
+                return 0;
             }
 
-            // Redondear al centímetro superior más cercano
             const roundedLength = Math.ceil(finalLength);
             resultElement.textContent = `${roundedLength.toFixed(0)} CM`;
+            
+            return roundedLength;
         }
-        // --- FIN CÁLCULO DE LARGO DTF ---
-        
-        // --- CÁLCULO DE ÁREA/PLANILLAS (Materiales no DTF) ---
+
+        /**
+         * Calcula el precio final del DTF basado en el largo ingresado
+         */
+        window.calculateDtfPrice = function() {
+            const material = document.getElementById('material').value;
+            const totalElement = document.getElementById('dtf-total-price');
+            const unitPriceElement = document.getElementById('dtf-unit-price');
+            const addButton = document.getElementById('add-to-list-dtf');
+            
+            let printedLength = parseFloat(document.getElementById('printed_length_direct').value) || 0;
+            
+            let totalPrice = 0;
+            let effectiveRate = 0;
+            
+            const warningId = 'min-price-warning';
+            const existingWarning = document.getElementById(warningId);
+            if (existingWarning) existingWarning.remove();
+            
+            if (printedLength <= 0) {
+                 totalElement.textContent = formatTotal(0);
+                 unitPriceElement.textContent = formatRate(0);
+                 addButton.disabled = true;
+                 return;
+            }
+
+            if (printedLength < MIN_DTF_LENGTH) {
+                totalElement.textContent = formatTotal(0);
+                unitPriceElement.textContent = formatRate(0);
+                addButton.disabled = true;
+                
+                // Muestra advertencia de precio mínimo
+                document.getElementById('length-inputs').querySelector('.space-y-2').insertAdjacentHTML('beforeend',
+                    `<p id="${warningId}" class="text-sm text-primary font-bold mt-2">⚠️ Largo mínimo de impresión es de 10 cm ($${DTF_PRICE_TABLE[10]}.00 MXN).</p>`
+                );
+                return;
+            }
+            
+            const lengthForPricing = Math.ceil(printedLength);
+            
+            if (lengthForPricing <= 0) {
+                // Ya se manejó arriba, pero como fallback
+                totalPrice = 0;
+            } else if (lengthForPricing in DTF_PRICE_TABLE) {
+                // Precio de la tabla para 10-99 cm
+                totalPrice = DTF_PRICE_TABLE[lengthForPricing];
+                effectiveRate = totalPrice / lengthForPricing;
+            } else if (lengthForPricing >= 100 && lengthForPricing < 300) {
+                // Tarifa de 100 a 299 cm
+                totalPrice = lengthForPricing * DTF_RATE_100_299;
+                effectiveRate = DTF_RATE_100_299;
+            } else if (lengthForPricing >= 300) {
+                // Tarifa de 300 cm en adelante
+                totalPrice = lengthForPricing * DTF_RATE_300_PLUS;
+                effectiveRate = DTF_RATE_300_PLUS;
+            }
+
+            totalElement.textContent = formatTotal(totalPrice);
+            unitPriceElement.textContent = formatRate(effectiveRate);
+            
+            currentQuoteData = {
+                material: material,
+                name: MATERIAL_NAMES[material],
+                price: totalPrice,
+                quantity: lengthForPricing,
+                unit_type: 'CM', 
+                details: `${lengthForPricing.toFixed(0)} CM @ ${formatRate(effectiveRate)}/cm`,
+            };
+            
+            addButton.disabled = totalPrice <= 0;
+        }
+
+        /**
+         * Calcula cuántos stickers caben por planilla
+         */
         function calculateFitPerSheet(width, height) {
             if (width <= 0 || height <= 0) return 0;
 
             const w_prime = width + STICKER_SPACING_CM;
             const h_prime = height + STICKER_SPACING_CM;
 
-            // 1. Orientación Normal
+            // Orientación 1
             const fit1_rows = Math.floor(CRICUT_USABLE_WIDTH_CM / w_prime);
             const fit1_cols = Math.floor(CRICUT_USABLE_HEIGHT_CM / h_prime);
             const fit1 = fit1_rows * fit1_cols;
 
-            // 2. Orientación Rotada 
+            // Orientación 2 (rotado)
             const fit2_rows = Math.floor(CRICUT_USABLE_WIDTH_CM / h_prime);
             const fit2_cols = Math.floor(CRICUT_USABLE_HEIGHT_CM / w_prime);
             const fit2 = fit2_rows * fit2_cols;
@@ -417,6 +874,9 @@
             return Math.max(fit1, fit2);
         }
 
+        /**
+         * Obtiene el precio total de las planillas según el material y la cantidad
+         */
         function getSheetTotalPrice(sheets, material) {
             if (sheets <= 0) return 0;
             
@@ -424,7 +884,8 @@
                 if (sheets in CLASSIC_GLOSSY_PRICING_MAP) {
                     return CLASSIC_GLOSSY_PRICING_MAP[sheets];
                 } 
-                if (sheets >= 101) {
+                // Tarifa bulk para más de 100
+                if (sheets > 100) { 
                     return sheets * CLASSIC_BULK_SHEET_RATE;
                 }
             }
@@ -434,75 +895,52 @@
                 if (sheets >= 20) {
                     return sheets * VINYL_BULK_RATE; 
                 }
-                if (sheets in VINYL_UNIT_RATE_TABLE) {
-                    return sheets * VINYL_UNIT_RATE_TABLE[sheets];
+                const pricePerSheet = VINYL_UNIT_RATE_TABLE[sheets];
+                if (pricePerSheet) {
+                    return sheets * pricePerSheet;
+                }
+                // Si está entre 1 y 19 pero el valor no está en el mapa, usa el precio por planilla de 19.
+                 if (sheets >= 1) { 
+                     const rate19 = VINYL_UNIT_RATE_TABLE[19] || VINYL_BULK_RATE;
+                     return sheets * (VINYL_UNIT_RATE_TABLE[sheets] || rate19);
                 }
             }
             
             return 0;
         }
 
-        function updateWhatsappLink(totalPrice, materialId, printedLengthUsed) {
-            const materialName = MATERIAL_NAMES[materialId] || 'Material Desconocido';
-            const formattedPrice = formatTotal(totalPrice);
-            
-            const whatsappNumber = '5216677809284'; 
-            
-            let message = '';
-            let isDtfPremium = (materialId === 'premium_dtf');
-
-            if (isDtfPremium) {
-                const length = printedLengthUsed; 
-                message = `¡Hola! Quiero confirmar mi pedido de stickers en Algo Special. La cotización es:\n\n*Material:* ${materialName}\n*Largo total cotizado:* ${length} CM\n*Precio Total Estimado:* ${formattedPrice}\n\nPor favor, ayúdame a finalizar la compra y enviar mis archivos.`;
-            } else {
-                const quantity = parseFloat(document.getElementById('quantity').value) || 0;
-                const width = parseFloat(document.getElementById('width').value) || 0;
-                const height = parseFloat(document.getElementById('height').value) || 0;
-                const sheets = document.getElementById('sheets-needed').textContent;
-                
-                message = `¡Hola! Quiero confirmar mi pedido de stickers en Algo Special. La cotización es:\n\n*Material:* ${materialName}\n*Cantidad de Stickers:* ${quantity}\n*Tamaño:* ${width}x${height} CM\n*Planillas Necesarias:* ${sheets}\n*Precio Total Estimado:* ${formattedPrice}\n\nPor favor, ayúdame a finalizar la compra y enviar mis archivos.`;
-            }
-
-            const encodedMessage = encodeURIComponent(message);
-            const whatsappLink = `https://wa.me/${whatsappNumber}?text=${encodedMessage}`;
-            
-            document.getElementById('order-button').href = whatsappLink;
-        }
-
-
-        function calculateAreaPrice() {
+        /**
+         * Calcula el precio de stickers por planillas (área)
+         */
+        window.calculateAreaPrice = function() {
             const material = document.getElementById('material').value; 
             const quantityInput = document.getElementById('quantity').value;
             const widthInput = document.getElementById('width').value;
             const heightInput = document.getElementById('height').value;
+            const addButton = document.getElementById('add-to-list-area');
+            
+            const totalElement = document.getElementById('area-total-price');
+            const unitPriceElement = document.getElementById('area-unit-price');
             
             const quantity = parseFloat(quantityInput) || 0;
             const width = parseFloat(widthInput) || 0;
             const height = parseFloat(heightInput) || 0;
             
-            const totalElement = document.getElementById('total-price');
-            const unitPriceContainer = document.getElementById('unit-price-container');
-            const unitPriceElement = document.getElementById('unit-price');
-            const unitPriceLabelElement = document.getElementById('unit-price-label');
-            
-            unitPriceContainer.style.display = 'flex';
-            unitPriceLabelElement.textContent = 'Costo por planilla:'; // <--- CORREGIDO
-            
             let totalCost = 0;
             let effectiveRatePerSheet = 0;
+            let sheetsNeeded = 0;
 
             if (quantity <= 0 || width <= 0 || height <= 0) {
                 totalElement.textContent = formatTotal(0);
                 document.getElementById('fit-per-sheet').textContent = 0;
                 document.getElementById('sheets-needed').textContent = 0;
                 unitPriceElement.textContent = formatRate(0);
-                updateWhatsappLink(0, material, 0); 
+                addButton.disabled = true;
                 return;
             }
             
             const fitPerSheet = calculateFitPerSheet(width, height);
             
-            let sheetsNeeded = 0;
             if (fitPerSheet > 0) {
                 sheetsNeeded = Math.ceil(quantity / fitPerSheet);
             }
@@ -512,7 +950,7 @@
                 document.getElementById('fit-per-sheet').textContent = "¡Demasiado grande!";
                 document.getElementById('sheets-needed').textContent = "-";
                 unitPriceElement.textContent = formatRate(0);
-                updateWhatsappLink(0, material, 0); 
+                addButton.disabled = true;
                 return;
             }
 
@@ -526,136 +964,471 @@
             document.getElementById('fit-per-sheet').textContent = fitPerSheet;
             document.getElementById('sheets-needed').textContent = sheetsNeeded;
             unitPriceElement.textContent = formatRate(effectiveRatePerSheet);
-            updateWhatsappLink(totalCost, material, 0); 
+            
+            currentQuoteData = {
+                material: material,
+                name: MATERIAL_NAMES[material], 
+                price: totalCost,
+                quantity: sheetsNeeded,
+                unit_type: 'PLANILLA', 
+                details: `${width}x${height}cm (${quantity} stickers)`,
+                unit_price: effectiveRatePerSheet 
+            };
+            
+            addButton.disabled = totalCost <= 0;
         }
-        // --- FIN CÁLCULO DE ÁREA/PLANILLAS ---
 
-        // --- CÁLCULO DE PRECIO DTF (USANDO INPUT DIRECTO) ---
-        function calculateDtfPrice() {
-            const material = document.getElementById('material').value;
-            const totalElement = document.getElementById('total-price');
-            const unitPriceContainer = document.getElementById('unit-price-container');
-            const unitPriceElement = document.getElementById('unit-price');
-            const unitPriceLabelElement = document.getElementById('unit-price-label');
-            
-            unitPriceContainer.style.display = 'flex';
-            unitPriceLabelElement.textContent = 'Costo por centímetro:'; // <--- CORREGIDO
+        // ======================================================================
+        // E. LÓGICA DE PRODUCTOS FIJOS
+        // ======================================================================
+        
+        /**
+         * Rellena las opciones de Vaso o Combo dinámicamente.
+         */
+        function populateFixedProductSelect(material, selectElement) {
+            selectElement.innerHTML = '';
+            let options = [];
 
-            let printedLength = parseFloat(document.getElementById('printed_length_direct').value) || 0;
-            const pricingNote = document.getElementById('dtf-pricing-note');
-            
-            pricingNote.classList.remove('text-primary', 'font-bold');
-            pricingNote.textContent = '';
-
-            let totalPrice = 0;
-            let effectiveRate = 0;
-            
-            if (printedLength <= 0) {
-                totalElement.textContent = formatTotal(0);
-                unitPriceElement.textContent = formatRate(0); 
-                updateWhatsappLink(0, material, 0);
-                pricingNote.textContent = 'Ingrese el largo en centímetros para cotizar.';
-                return;
+            if (material === 'vaso') {
+                document.querySelector('#vaso-type-container label').textContent = 'TIPO DE VASO';
+                options = [
+                    { value: "cilindro_chupon", text: "CILINDRO CHUPÓN" },
+                    { value: "cilindro_popote", text: "CILINDRO POPOTE" },
+                    { value: "vaso_popote_16oz", text: "VASO POPOTE 16 OZ" },
+                    { value: "vaso_popote_24oz", text: "VASO POPOTE 24 OZ" },
+                    { value: "vaso_vip", text: "VASO VIP (CRISTAL POPOTE)" }
+                ];
+            } else if (material === 'combo') {
+                document.querySelector('#vaso-type-container label').textContent = 'TIPO DE COMBO';
+                options = [
+                    { value: "combo_cilindro_chupon", text: "COMBO CILINDRO CHUPÓN" },
+                    { value: "combo_cilindro_popote", text: "COMBO CILINDRO POPOTE" },
+                    { value: "combo_vaso_popote_16oz", text: "COMBO VASO POPOTE 16 OZ" },
+                    { value: "combo_vaso_popote_24oz", text: "COMBO VASO POPOTE 24 OZ" },
+                    { value: "combo_vaso_vip", text: "COMBO VASO VIP (CRISTAL POPOTE)" }
+                ];
             }
 
-
-            if (printedLength < MIN_DTF_LENGTH) {
-                const minCost = DTF_DISCRETE_PRICING_MAP[MIN_DTF_LENGTH] || 0;
-                
-                pricingNote.classList.add('text-primary', 'font-bold'); 
-                pricingNote.textContent = `El mínimo a cotizar es ${MIN_DTF_LENGTH} CM. Se aplicará el precio mínimo de ${formatTotal(minCost)}.`;
-                
-                totalPrice = minCost;
-                effectiveRate = totalPrice / printedLength;
-            }
-            else if (printedLength <= MAX_DISCRETE_CM) {
-                const cmLookup = Math.round(printedLength);
-                const discretePrice = DTF_DISCRETE_PRICING_MAP[cmLookup];
-                
-                if (discretePrice !== undefined) {
-                    totalPrice = discretePrice;
-                } else {
-                    // Fallback para valores intermedios (puede interpolar o usar una tarifa promedio)
-                    const fallbackRate = (PRICE_AT_MAX_DISCRETE_CM / MAX_DISCRETE_CM);
-                    totalPrice = printedLength * fallbackRate;
-                }
-
-                totalPrice = Math.ceil(totalPrice); 
-                effectiveRate = totalPrice / printedLength;
-
-            } 
-            else { // Mayor a MAX_DISCRETE_CM (300+ CM)
-                totalPrice = printedLength * OVER_300_RATE_PER_CM;
-                totalPrice = Math.ceil(totalPrice); 
-                effectiveRate = OVER_300_RATE_PER_CM;
-            }
-            
-            // 4. ACTUALIZAR UI FINAL
-            totalElement.textContent = formatTotal(totalPrice);
-            unitPriceElement.textContent = formatRate(effectiveRate); 
-            updateWhatsappLink(totalPrice, material, printedLength);
+            options.forEach(opt => {
+                const option = document.createElement('option');
+                option.value = opt.value;
+                option.textContent = opt.text;
+                selectElement.appendChild(option);
+            });
         }
-        // --- FIN CÁLCULO DE PRECIO DTF ---
 
 
         /**
-         * Función principal que decide qué cotización usar. (ACCESIBLE GLOBALMENTE)
+         * Calcula el precio de Productos Fijos (Vaso, Mantelito, Combo)
          */
+        window.calculateFixedPrice = function() {
+            const material = document.getElementById('material').value; 
+            const vasoSelect = document.getElementById('select-vaso');
+            const mantelitoSelect = document.getElementById('select-mantelito');
+
+            const selectedType = (material === 'mantelito') ? mantelitoSelect.value : vasoSelect.value;
+            const quantityInput = document.getElementById('quantity_product').value;
+            const addButton = document.getElementById('add-to-list-product');
+
+            const totalElement = document.getElementById('product-total-price');
+            const unitPriceElement = document.getElementById('product-unit-price');
+
+            const quantity = parseInt(quantityInput) || 0;
+            
+            let itemData; 
+            let unitPrice = 0; 
+            let itemName = 'PRODUCTO DESCONOCIDO';
+            let unitType = 'UNIDAD';
+            let detailPrice = 0; 
+
+            if (quantity <= 0) {
+                 totalElement.textContent = formatTotal(0);
+                 unitPriceElement.textContent = formatRate(0);
+                 addButton.disabled = true;
+                 return;
+            }
+
+
+            // 1. Mantelito
+            if (material === 'mantelito') {
+                itemData = PRODUCT_PRICES[material][selectedType]; 
+                unitPrice = getMantelitoPrice(itemData.key, quantity);
+                itemName = itemData.name;
+                unitType = itemData.baseUnit;
+                detailPrice = unitPrice;
+
+            // 2. Vaso Personalizado (Aplica tabulador)
+            } else if (material === 'vaso') {
+                itemData = PRODUCT_PRICES[material][selectedType];
+                unitPrice = getVasoPriceByQuantity(itemData.key, quantity);
+                itemName = itemData.name;
+                unitType = itemData.baseUnit;
+                detailPrice = unitPrice;
+
+            // 3. Combo (Aplica getComboPrice)
+            } else if (material === 'combo') {
+                itemData = PRODUCT_PRICES[material][selectedType];
+                unitPrice = getComboPrice(itemData.key, quantity); 
+                itemName = itemData.name;
+                unitType = itemData.baseUnit;
+                detailPrice = unitPrice;
+            } 
+            
+            if (unitPrice <= 0) {
+                totalElement.textContent = formatTotal(0);
+                unitPriceElement.textContent = formatRate(0);
+                addButton.disabled = true;
+                return;
+            }
+
+            const totalPrice = quantity * unitPrice;
+
+            totalElement.textContent = formatTotal(totalPrice);
+            unitPriceElement.textContent = formatRate(unitPrice);
+
+            // Actualizar currentQuoteData para el carrito
+            currentQuoteData = {
+                material: material,
+                name: itemName, 
+                price: totalPrice,
+                quantity: quantity,
+                unit_type: unitType,
+                details: `Total: ${formatRate(totalPrice)} (${formatRate(unitPrice)} c/u)`, 
+                unit_price: unitPrice 
+            };
+
+            addButton.disabled = totalPrice <= 0;
+        }
+        
+        // ======================================================================
+        // F. FUNCIÓN PRINCIPAL DE COTIZACIÓN (Manejo de Interfaces)
+        // ======================================================================
         window.calculateQuote = function() {
             const material = document.getElementById('material').value;
             const isDtfPremium = (material === 'premium_dtf');
-
-            // Alternar visibilidad de inputs de ÁREA vs LARGO y la NUEVA CALCULADORA
-            document.getElementById('dtf-calculator').classList.toggle('hidden', !isDtfPremium); // Muestra/Oculta la calculadora
-            document.getElementById('length-inputs').classList.toggle('hidden', !isDtfPremium); // Muestra/Oculta la entrada de precio DTF
-            document.getElementById('area-inputs').classList.toggle('hidden', isDtfPremium); // Muestra/Oculta la entrada de Área
+            const isPlanilla = PLANILLA_MATERIALS.includes(material);
+            const isFixedProduct = FIXED_PRODUCTS.includes(material);
             
+            const vasoTypeContainer = document.getElementById('vaso-type-container');
+            const vasoSelect = document.getElementById('select-vaso');
+            const mantelitoTypeContainer = document.getElementById('mantelito-type-container'); 
+
+            // Ocultar todas las interfaces primero
+            document.getElementById('dtf-interface').classList.add('hidden');
+            document.getElementById('area-inputs').classList.add('hidden');
+            document.getElementById('product-inputs').classList.add('hidden');
+            vasoTypeContainer.classList.add('hidden');
+            mantelitoTypeContainer.classList.add('hidden'); 
+            
+            // Lógica de DTF
             if (isDtfPremium) {
-                calculateDtfLength(); // Ejecuta la calculadora de largo
-                calculateDtfPrice();  // Ejecuta la cotización de precio
+                document.getElementById('dtf-interface').classList.remove('hidden');
+                
+                const calculatedLength = calculateDtfLength(); 
+                
+                const directInput = document.getElementById('printed_length_direct');
+                
+                // Si la calculadora da un valor, lo establece en el input de cotización
+                if (calculatedLength > 0 && calculatedLength !== parseFloat(directInput.value)) {
+                     directInput.value = calculatedLength;
+                } else if (parseFloat(directInput.value) < MIN_DTF_LENGTH) {
+                    // Asegura que el valor mínimo sea 10 cm si es menor
+                   directInput.value = MIN_DTF_LENGTH;
+                }
+                
+                calculateDtfPrice();
+
+            // Lógica de Planillas
+            } else if (isPlanilla) {
+                document.getElementById('area-inputs').classList.remove('hidden');
+                calculateAreaPrice();
+            
+            // Lógica de Productos Fijos
+            } else if (isFixedProduct) {
+                document.getElementById('product-inputs').classList.remove('hidden');
+                
+                if (material === 'vaso' || material === 'combo') {
+                    vasoTypeContainer.classList.remove('hidden');
+                    populateFixedProductSelect(material, vasoSelect);
+                } else if (material === 'mantelito') {
+                    mantelitoTypeContainer.classList.remove('hidden');
+                }
+                
+                calculateFixedPrice();
+            }
+        }
+
+        // ======================================================================
+        // G. LÓGICA DEL CARRITO (LISTA DE PRODUCTOS)
+        // ======================================================================
+        
+        /**
+         * Genera el mensaje y link de WhatsApp
+         */
+        function updateWhatsappLink(listTotal) {
+            const whatsappNumber = '5216677809284'; 
+            const formattedTotal = formatTotal(listTotal);
+            
+            let message = `¡Hola! Quiero confirmar mi pedido de Algo Special. Mi lista de cotización es:\n\n`;
+            
+            if (quoteList.length === 0) {
+                message += `(La lista estaba vacía, por favor, cotiza tus productos primero)`;
             } else {
-                calculateAreaPrice(); // Ejecuta la cotización por área/planilla
-            }
-        }
+                quoteList.forEach(item => {
+                    let quantityDisplay = item.quantity.toFixed(0);
+                    let nameDisplay = item.name;
+                    let priceDisplay = formatTotal(item.price);
 
-        // --- D. Inicialización de Firebase (Necesario para el entorno) ---
-
-        function initializeFirebase() {
-            try {
-                if (Object.keys(firebaseConfig).length === 0) {
-                    console.warn("Firebase Configuración no encontrada. Ejecutando sin persistencia.");
-                    calculateQuote();
-                    return;
-                }
-                
-                app = initializeApp(firebaseConfig);
-                db = getFirestore(app);
-                auth = getAuth(app);
-                
-                if (initialAuthToken) {
-                    signInWithCustomToken(auth, initialAuthToken);
-                } else {
-                    signInAnonymously(auth);
-                }
-
-                onAuthStateChanged(auth, (user) => {
-                    if (user) {
-                        userId = user.uid;
+                    // Construir la descripción según el tipo de producto
+                    if (item.material === 'premium_dtf') {
+                        message += `(${quantityDisplay}) CM ${nameDisplay} ${priceDisplay}\n`;
+                    } else if (PLANILLA_MATERIALS.includes(item.material)) {
+                        message += `(${quantityDisplay}) PLANILLA ${nameDisplay} ${priceDisplay}\n`;
                     } else {
-                        userId = null;
+                        // Para productos fijos como Vasos, Mantelitos, Combos
+                        message += `(${quantityDisplay}) ${nameDisplay} ${priceDisplay}\n`;
                     }
-                    // Después de la autenticación inicial, calcular la cotización
-                    calculateQuote();
                 });
+            }
+            
+            message += `\nTOTAL COTIZADO: ${formattedTotal}\n\nPor favor, ayúdame a finalizar la compra y enviar mis archivos.`;
 
-            } catch (error) {
-                console.error("Error al inicializar Firebase o autenticar:", error);
-                calculateQuote();
+            const encodedMessage = encodeURIComponent(message);
+            const whatsappLink = `https://wa.me/${whatsappNumber}?text=${encodedMessage}`;
+            
+            document.getElementById('order-button').href = whatsappLink;
+        }
+
+        /**
+         * Renderiza la lista de productos y actualiza el total.
+         */
+        function updateQuoteListAndTotal() {
+            const listContainer = document.getElementById('quote-list');
+            const totalElement = document.getElementById('final-total');
+            const generateTicketBtn = document.getElementById('generate-ticket-btn');
+            
+            const listTotal = quoteList.reduce((sum, item) => sum + item.price, 0);
+
+            totalElement.textContent = formatTotal(listTotal);
+            
+            // Habilitar/deshabilitar botón de generar ticket
+            generateTicketBtn.disabled = quoteList.length === 0;
+            
+            if (quoteList.length === 0) {
+                listContainer.innerHTML = '<p id="empty-list-message" class="text-center text-gray-500 italic">La lista está vacía.</p>';
+            } else {
+                let htmlContent = '';
+                quoteList.forEach((item, index) => {
+                    
+                    const quantityDisplay = item.quantity.toFixed(0);
+                    let fullDescription = '';
+
+                    // Construir la cadena de texto para la línea del producto
+                    if (item.material === 'premium_dtf') {
+                        fullDescription = `(${quantityDisplay}) CM ${item.name}`;
+                    } else if (PLANILLA_MATERIALS.includes(item.material)) {
+                        fullDescription = `(${quantityDisplay}) PLANILLA ${item.name}`;
+                    } else {
+                        // Para productos fijos como Vasos, Mantelitos, Combos
+                        fullDescription = `(${quantityDisplay}) ${item.name}`;
+                    }
+                    
+                    const priceDisplay = formatTotal(item.price);
+
+                    htmlContent += `
+                        <div class="flex justify-between items-center p-3 bg-text-light rounded-lg border border-gray-400 text-sm sm:text-base">
+                            <!-- Descripción (Izquierda) -->
+                            <div class="flex-1 min-w-0 pr-4">
+                                <p class="font-bold text-text-dark">
+                                    ${fullDescription}
+                                </p>
+                            </div>
+                            
+                            <!-- Precio y Botón de Eliminar (Derecha) -->
+                            <div class="flex items-center space-x-3 flex-shrink-0">
+                                <span class="font-extrabold text-primary text-lg whitespace-nowrap">
+                                    ${priceDisplay}
+                                </span>
+                                <button onclick="removeItemFromList(${index})" title="Eliminar Producto" class="p-1 rounded-full hover:bg-red-100">
+                                    <!-- Icono de bote de basura (SVG en línea) -->
+                                    <svg class="trash-icon w-5 h-5 text-gray-600 hover:text-red-500" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                        <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 6h6v10H7V6z" clip-rule="evenodd"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                });
+                listContainer.innerHTML = htmlContent;
+            }
+            
+            updateWhatsappLink(listTotal);
+        }
+
+        /**
+         * Añade la cotización actual a la lista de productos (carrito).
+         */
+        window.addCurrentQuoteToList = function() {
+            if (currentQuoteData.price > 0) {
+                const itemToAdd = { ...currentQuoteData, id: Date.now() + Math.random() }; 
+                quoteList.push(itemToAdd);
+                updateQuoteListAndTotal();
+                
+                // Efecto visual:
+                let addButtonId = '';
+                const material = document.getElementById('material').value;
+
+                if (material === 'premium_dtf') {
+                    addButtonId = 'add-to-list-dtf';
+                } else if (PLANILLA_MATERIALS.includes(material)) {
+                    addButtonId = 'add-to-list-area';
+                } else if (FIXED_PRODUCTS.includes(material)) {
+                    addButtonId = 'add-to-list-product';
+                }
+
+                const addButton = document.getElementById(addButtonId);
+                if (addButton) {
+                    addButton.textContent = '¡AÑADIDO!';
+                    addButton.classList.add('bg-secondary', 'text-text-dark', 'pulse-secondary-animation'); 
+                    addButton.classList.remove('bg-primary', 'text-text-light');
+                    setTimeout(() => {
+                        addButton.textContent = 'AÑADIR A LA LISTA';
+                        addButton.classList.remove('bg-secondary', 'text-text-dark', 'pulse-secondary-animation');
+                        addButton.classList.add('bg-primary', 'text-text-light');
+                    }, 1500);
+                }
+
+            } else {
+                console.warn("No se puede añadir a la lista, el precio es cero.");
             }
         }
 
-        // Inicializar al cargar la ventana
-        window.onload = initializeFirebase;
+        /**
+         * Elimina un producto de la lista por su índice.
+         */
+        window.removeItemFromList = function(index) {
+            if (index > -1 && index < quoteList.length) {
+                quoteList.splice(index, 1);
+                updateQuoteListAndTotal();
+            }
+        }
+
+        // ======================================================================
+        // H. GENERADOR DE TICKET
+        // ======================================================================
+        
+        /**
+         * Genera el contenido del ticket
+         */
+        function generateTicketContent() {
+            const ticketPreview = document.getElementById('ticket-preview');
+            const listTotal = quoteList.reduce((sum, item) => sum + item.price, 0);
+            const formattedTotal = formatTotal(listTotal);
+            const today = new Date();
+            const dateString = today.toLocaleDateString('es-MX', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+            
+            let ticketHTML = `
+                <div class="ticket-header">
+                    <img src="https://www.dropbox.com/scl/fi/xpobzj48hrvwrggk9w2iz/INSTAGRAM.png?rlkey=zcxxkd3uuj27nlbsiccynl6ju&st=aciec22s&dl=1" 
+                         alt="Logo de Algo Special" 
+                         class="ticket-logo">
+                    <div class="ticket-title">ALGO SPECIAL</div>
+                    <div class="ticket-subtitle">Transforma cada momento en una experiencia extraordinaria</div>
+                    <div style="font-size: 12px; margin-top: 5px; color: #666;">COTIZACIÓN - ${dateString}</div>
+                </div>
+            `;
+            
+            // Agregar productos al ticket
+            quoteList.forEach(item => {
+                const quantityDisplay = item.quantity.toFixed(0);
+                let description = '';
+                
+                if (item.material === 'premium_dtf') {
+                    description = `${quantityDisplay} CM ${item.name}`;
+                } else if (PLANILLA_MATERIALS.includes(item.material)) {
+                    description = `${quantityDisplay} PLANILLA ${item.name}`;
+                } else {
+                    description = `${quantityDisplay} ${item.name}`;
+                }
+                
+                ticketHTML += `
+                    <div class="ticket-item">
+                        <span>${description}</span>
+                        <span>${formatTotal(item.price)}</span>
+                    </div>
+                `;
+            });
+            
+            // Agregar total
+            ticketHTML += `
+                <div class="ticket-total">
+                    <span>TOTAL</span>
+                    <span>${formattedTotal}</span>
+                </div>
+                <div class="ticket-footer">
+                    <p>¡Gracias por tu preferencia!</p>
+                    <p>Cotización válida por 7 días</p>
+                    <p>www.algospecial.com</p>
+                </div>
+            `;
+            
+            ticketPreview.innerHTML = ticketHTML;
+        }
+        
+        /**
+         * Genera y muestra el ticket
+         */
+        function generateTicket() {
+            if (quoteList.length === 0) {
+                alert('No hay productos en la lista para generar un ticket.');
+                return;
+            }
+            
+            generateTicketContent();
+            document.getElementById('ticket-container').classList.remove('hidden');
+        }
+        
+        /**
+         * Cierra la vista previa del ticket
+         */
+        function closeTicketPreview() {
+            document.getElementById('ticket-container').classList.add('hidden');
+        }
+        
+        /**
+         * Descarga el ticket como imagen
+         */
+        function downloadTicket() {
+            const ticketElement = document.getElementById('ticket-preview');
+            
+            html2canvas(ticketElement, {
+                scale: 2, // Mejor calidad
+                backgroundColor: '#ffffff'
+            }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = `cotizacion-algo-special-${new Date().toISOString().slice(0,10)}.png`;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+                
+                // Cerrar la vista previa después de descargar
+                closeTicketPreview();
+            });
+        }
+
+        // ======================================================================
+        // I. INICIALIZACIÓN
+        // ======================================================================
+        
+        // Iniciar la cotización al cargar la página
+        window.addEventListener('load', () => {
+             window.calculateQuote(); 
+             updateQuoteListAndTotal(); // Actualiza la lista vacía y el link de WhatsApp
+        });
+        
     </script>
 </body>
 </html>
