@@ -507,8 +507,6 @@
 
     <!-- JavaScript para el cálculo de la cotización -->
     <script>
-        // El código JavaScript permanece igual que en la versión anterior
-        // Solo se han modificado los estilos CSS para mejorar la responsividad
         const MIN_DTF_LENGTH = 10;
         let quoteList = [];
 
@@ -749,6 +747,9 @@
             quantity: 0,
             unit_type: 'CM',
             details: '',
+            width: 0,
+            height: 0,
+            sticker_quantity: 0
         };
 
         // FUNCIONES DE FORMATO
@@ -873,6 +874,9 @@
                 quantity: lengthForPricing,
                 unit_type: 'CM',
                 details: `${lengthForPricing.toFixed(0)} CM @ ${formatRate(effectiveRate)}/cm`,
+                width: parseFloat(document.getElementById('width_dtf').value) || 0,
+                height: parseFloat(document.getElementById('height_dtf').value) || 0,
+                sticker_quantity: parseFloat(document.getElementById('quantity_dtf').value) || 0
             };
             
             addButton.disabled = totalPrice <= 0;
@@ -897,34 +901,42 @@
             return Math.max(fit1, fit2);
         }
 
-        function getSheetTotalPrice(sheets, material) {
-            if (sheets <= 0) return 0;
+        // NUEVA FUNCIÓN: Calcular precio total basado en la suma de todas las planillas de la misma categoría
+        function getTotalPriceForSheets(totalSheets, material) {
+            if (totalSheets <= 0) return 0;
             
             if (material === 'classic_glossy') {
-                if (sheets in CLASSIC_GLOSSY_PRICING_MAP) {
-                    return CLASSIC_GLOSSY_PRICING_MAP[sheets];
+                if (totalSheets in CLASSIC_GLOSSY_PRICING_MAP) {
+                    return CLASSIC_GLOSSY_PRICING_MAP[totalSheets];
                 }
-                if (sheets > 100) {
-                    return sheets * CLASSIC_BULK_SHEET_RATE;
+                if (totalSheets > 100) {
+                    return totalSheets * CLASSIC_BULK_SHEET_RATE;
                 }
             }
             
             const isVinyl = VINYL_MATERIALS.includes(material);
             if (isVinyl) {
-                if (sheets >= 20) {
-                    return sheets * VINYL_BULK_RATE;
+                if (totalSheets >= 20) {
+                    return totalSheets * VINYL_BULK_RATE;
                 }
-                const pricePerSheet = VINYL_UNIT_RATE_TABLE[sheets];
+                const pricePerSheet = VINYL_UNIT_RATE_TABLE[totalSheets];
                 if (pricePerSheet) {
-                    return sheets * pricePerSheet;
+                    return totalSheets * pricePerSheet;
                 }
-                if (sheets >= 1) {
+                if (totalSheets >= 1) {
                      const rate19 = VINYL_UNIT_RATE_TABLE[19] || VINYL_BULK_RATE;
-                     return sheets * (VINYL_UNIT_RATE_TABLE[sheets] || rate19);
+                     return totalSheets * (VINYL_UNIT_RATE_TABLE[totalSheets] || rate19);
                 }
             }
             
             return 0;
+        }
+
+        // NUEVA FUNCIÓN: Calcular el precio unitario por planilla
+        function getUnitPriceForSheets(totalSheets, material) {
+            if (totalSheets <= 0) return 0;
+            const totalPrice = getTotalPriceForSheets(totalSheets, material);
+            return totalPrice / totalSheets;
         }
 
         window.calculateAreaPrice = function() {
@@ -969,11 +981,9 @@
                 return;
             }
 
-            totalCost = getSheetTotalPrice(sheetsNeeded, material);
-            
-            if (sheetsNeeded > 0 && totalCost > 0) {
-                 effectiveRatePerSheet = totalCost / sheetsNeeded;
-            }
+            // Calcular el precio unitario por planilla (para mostrar en la interfaz)
+            effectiveRatePerSheet = getUnitPriceForSheets(sheetsNeeded, material);
+            totalCost = sheetsNeeded * effectiveRatePerSheet;
             
             totalElement.textContent = formatTotal(totalCost);
             document.getElementById('fit-per-sheet').textContent = fitPerSheet;
@@ -987,7 +997,11 @@
                 quantity: sheetsNeeded,
                 unit_type: 'PLANILLA',
                 details: `${width}x${height}cm (${quantity} stickers)`,
-                unit_price: effectiveRatePerSheet
+                unit_price: effectiveRatePerSheet,
+                width: width,
+                height: height,
+                sticker_quantity: quantity,
+                fit_per_sheet: fitPerSheet
             };
             
             addButton.disabled = totalCost <= 0;
@@ -1157,6 +1171,53 @@
             }
         }
 
+        // NUEVA FUNCIÓN: Agrupar productos por categoría y calcular precio total
+        function calculateGroupedTotal() {
+            const groupedItems = {};
+            
+            // Agrupar productos por categoría
+            quoteList.forEach(item => {
+                if (PLANILLA_MATERIALS.includes(item.material)) {
+                    // Para productos de planillas, agrupar por material
+                    const key = item.material;
+                    if (!groupedItems[key]) {
+                        groupedItems[key] = {
+                            material: item.material,
+                            name: item.name,
+                            totalSheets: 0,
+                            totalPrice: 0,
+                            items: [],
+                            unit_price: 0
+                        };
+                    }
+                    groupedItems[key].totalSheets += item.quantity;
+                    groupedItems[key].items.push(item);
+                } else {
+                    // Para otros productos (DTF, productos fijos), mantener individual
+                    const key = item.id || Date.now() + Math.random();
+                    groupedItems[key] = {
+                        material: item.material,
+                        name: item.name,
+                        totalSheets: item.quantity,
+                        totalPrice: item.price,
+                        items: [item],
+                        unit_price: item.unit_price || 0
+                    };
+                }
+            });
+            
+            // Calcular precio total para productos agrupados por planillas
+            Object.keys(groupedItems).forEach(key => {
+                const group = groupedItems[key];
+                if (PLANILLA_MATERIALS.includes(group.material)) {
+                    group.totalPrice = getTotalPriceForSheets(group.totalSheets, group.material);
+                    group.unit_price = group.totalPrice / group.totalSheets;
+                }
+            });
+            
+            return groupedItems;
+        }
+
         // LÓGICA DEL CARRITO (LISTA DE PRODUCTOS)
         function updateWhatsappLink(listTotal) {
             const whatsappNumber = '5216677809284';
@@ -1167,17 +1228,26 @@
             if (quoteList.length === 0) {
                 message += `(La lista estaba vacía, por favor, cotiza tus productos primero)`;
             } else {
-                quoteList.forEach(item => {
-                    let quantityDisplay = item.quantity.toFixed(0);
-                    let nameDisplay = item.name;
-                    let priceDisplay = formatTotal(item.price);
-
-                    if (item.material === 'premium_dtf') {
-                        message += `(${quantityDisplay}) CM ${nameDisplay} ${priceDisplay}\n`;
-                    } else if (PLANILLA_MATERIALS.includes(item.material)) {
-                        message += `(${quantityDisplay}) PLANILLA ${nameDisplay} ${priceDisplay}\n`;
+                const groupedItems = calculateGroupedTotal();
+                
+                Object.keys(groupedItems).forEach(key => {
+                    const group = groupedItems[key];
+                    
+                    if (PLANILLA_MATERIALS.includes(group.material)) {
+                        // Para productos de planillas agrupados
+                        message += `(${group.totalSheets}) PLANILLA ${group.name} ${formatTotal(group.totalPrice)}\n`;
+                        
+                        // Detallar cada medida dentro del grupo
+                        group.items.forEach(item => {
+                            const stickersTotal = item.sticker_quantity || 0;
+                            message += `   - ${item.width}x${item.height}cm (${stickersTotal} stickers aprox.)\n`;
+                        });
+                    } else if (group.material === 'premium_dtf') {
+                        // Para DTF
+                        message += `(${group.totalSheets}) CM ${group.name} ${formatTotal(group.totalPrice)}\n`;
                     } else {
-                        message += `(${quantityDisplay}) ${nameDisplay} ${priceDisplay}\n`;
+                        // Para productos fijos
+                        message += `(${group.totalSheets}) ${group.name} ${formatTotal(group.totalPrice)}\n`;
                     }
                 });
             }
@@ -1195,7 +1265,8 @@
             const totalElement = document.getElementById('final-total');
             const generateTicketBtn = document.getElementById('generate-ticket-btn');
             
-            const listTotal = quoteList.reduce((sum, item) => sum + item.price, 0);
+            const groupedItems = calculateGroupedTotal();
+            const listTotal = Object.keys(groupedItems).reduce((sum, key) => sum + groupedItems[key].totalPrice, 0);
 
             totalElement.textContent = formatTotal(listTotal);
             
@@ -1205,51 +1276,132 @@
                 listContainer.innerHTML = '<p id="empty-list-message" class="text-center text-gray-500 italic text-sm sm:text-base">La lista está vacía.</p>';
             } else {
                 let htmlContent = '';
-                quoteList.forEach((item, index) => {
+                
+                Object.keys(groupedItems).forEach(key => {
+                    const group = groupedItems[key];
                     
-                    const quantityDisplay = item.quantity.toFixed(0);
-                    let fullDescription = '';
-
-                    if (item.material === 'premium_dtf') {
-                        fullDescription = `(${quantityDisplay}) CM ${item.name}`;
-                    } else if (PLANILLA_MATERIALS.includes(item.material)) {
-                        fullDescription = `(${quantityDisplay}) PLANILLA ${item.name}`;
+                    if (PLANILLA_MATERIALS.includes(group.material)) {
+                        // Para productos de planillas agrupados
+                        htmlContent += `
+                            <div class="flex flex-col p-2 sm:p-3 bg-text-light rounded-lg border border-gray-400 text-xs sm:text-sm md:text-base mb-2">
+                                <div class="flex justify-between items-center mb-2">
+                                    <div class="flex-1 min-w-0 pr-2 sm:pr-4">
+                                        <p class="font-bold text-text-dark">
+                                            (${group.totalSheets}) PLANILLA ${group.name}
+                                        </p>
+                                    </div>
+                                    <div class="flex items-center space-x-2 sm:space-x-3 flex-shrink-0">
+                                        <span class="font-extrabold text-primary text-base sm:text-lg whitespace-nowrap">
+                                            ${formatTotal(group.totalPrice)}
+                                        </span>
+                                        <button onclick="removeGroupFromList('${key}')" title="Eliminar Grupo" class="p-1 rounded-full hover:bg-red-100">
+                                            <svg class="trash-icon w-4 h-4 sm:w-5 sm:h-5 text-gray-600 hover:text-red-500" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                                <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 6h6v10H7V6z" clip-rule="evenodd"></path>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="pl-2 border-l-2 border-primary/30">
+                        `;
+                        
+                        // Detallar cada medida dentro del grupo
+                        group.items.forEach((item, index) => {
+                            const stickersTotal = item.sticker_quantity || 0;
+                            htmlContent += `
+                                <div class="flex justify-between items-center py-1 text-xs">
+                                    <span class="text-text-dark/80">${item.width}x${item.height}cm (${stickersTotal} stickers)</span>
+                                    <button onclick="removeItemFromGroup('${key}', ${index})" title="Eliminar Medida" class="p-1 rounded-full hover:bg-red-100 ml-2">
+                                        <svg class="w-3 h-3 text-gray-500 hover:text-red-500" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                                        </svg>
+                                    </button>
+                                </div>
+                            `;
+                        });
+                        
+                        htmlContent += `
+                                </div>
+                            </div>
+                        `;
                     } else {
-                        fullDescription = `(${quantityDisplay}) ${item.name}`;
-                    }
-                    
-                    const priceDisplay = formatTotal(item.price);
+                        // Para otros productos (DTF, productos fijos)
+                        const quantityDisplay = group.totalSheets.toFixed(0);
+                        let fullDescription = '';
 
-                    htmlContent += `
-                        <div class="flex justify-between items-center p-2 sm:p-3 bg-text-light rounded-lg border border-gray-400 text-xs sm:text-sm md:text-base">
-                            <div class="flex-1 min-w-0 pr-2 sm:pr-4">
-                                <p class="font-bold text-text-dark break-words">
-                                    ${fullDescription}
-                                </p>
+                        if (group.material === 'premium_dtf') {
+                            fullDescription = `(${quantityDisplay}) CM ${group.name}`;
+                        } else {
+                            fullDescription = `(${quantityDisplay}) ${group.name}`;
+                        }
+                        
+                        const priceDisplay = formatTotal(group.totalPrice);
+
+                        htmlContent += `
+                            <div class="flex justify-between items-center p-2 sm:p-3 bg-text-light rounded-lg border border-gray-400 text-xs sm:text-sm md:text-base">
+                                <div class="flex-1 min-w-0 pr-2 sm:pr-4">
+                                    <p class="font-bold text-text-dark break-words">
+                                        ${fullDescription}
+                                    </p>
+                                </div>
+                                
+                                <div class="flex items-center space-x-2 sm:space-x-3 flex-shrink-0">
+                                    <span class="font-extrabold text-primary text-base sm:text-lg whitespace-nowrap">
+                                        ${priceDisplay}
+                                    </span>
+                                    <button onclick="removeGroupFromList('${key}')" title="Eliminar Producto" class="p-1 rounded-full hover:bg-red-100">
+                                        <svg class="trash-icon w-4 h-4 sm:w-5 sm:h-5 text-gray-600 hover:text-red-500" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                            <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 6h6v10H7V6z" clip-rule="evenodd"></path>
+                                        </svg>
+                                    </button>
+                                </div>
                             </div>
-                            
-                            <div class="flex items-center space-x-2 sm:space-x-3 flex-shrink-0">
-                                <span class="font-extrabold text-primary text-base sm:text-lg whitespace-nowrap">
-                                    ${priceDisplay}
-                                </span>
-                                <button onclick="removeItemFromList(${index})" title="Eliminar Producto" class="p-1 rounded-full hover:bg-red-100">
-                                    <svg class="trash-icon w-4 h-4 sm:w-5 sm:h-5 text-gray-600 hover:text-red-500" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                                        <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 6h6v10H7V6z" clip-rule="evenodd"></path>
-                                    </svg>
-                                </button>
-                            </div>
-                        </div>
-                    `;
+                        `;
+                    }
                 });
+                
                 listContainer.innerHTML = htmlContent;
             }
             
             updateWhatsappLink(listTotal);
         }
 
+        // NUEVAS FUNCIONES PARA ELIMINAR GRUPOS E ITEMS
+        window.removeGroupFromList = function(groupKey) {
+            const groupedItems = calculateGroupedTotal();
+            const group = groupedItems[groupKey];
+            
+            if (group) {
+                // Eliminar todos los items del grupo
+                group.items.forEach(item => {
+                    const index = quoteList.findIndex(q => q.id === item.id);
+                    if (index > -1) {
+                        quoteList.splice(index, 1);
+                    }
+                });
+                updateQuoteListAndTotal();
+            }
+        }
+
+        window.removeItemFromGroup = function(groupKey, itemIndex) {
+            const groupedItems = calculateGroupedTotal();
+            const group = groupedItems[groupKey];
+            
+            if (group && group.items[itemIndex]) {
+                const itemToRemove = group.items[itemIndex];
+                const index = quoteList.findIndex(q => q.id === itemToRemove.id);
+                if (index > -1) {
+                    quoteList.splice(index, 1);
+                    updateQuoteListAndTotal();
+                }
+            }
+        }
+
         window.addCurrentQuoteToList = function() {
             if (currentQuoteData.price > 0) {
-                const itemToAdd = { ...currentQuoteData, id: Date.now() + Math.random() };
+                const itemToAdd = { 
+                    ...currentQuoteData, 
+                    id: Date.now() + Math.random() 
+                };
                 quoteList.push(itemToAdd);
                 updateQuoteListAndTotal();
                 
@@ -1281,17 +1433,11 @@
             }
         }
 
-        window.removeItemFromList = function(index) {
-            if (index > -1 && index < quoteList.length) {
-                quoteList.splice(index, 1);
-                updateQuoteListAndTotal();
-            }
-        }
-
         // GENERADOR DE TICKET
         function generateTicketContent() {
             const ticketPreview = document.getElementById('ticket-preview');
-            const listTotal = quoteList.reduce((sum, item) => sum + item.price, 0);
+            const groupedItems = calculateGroupedTotal();
+            const listTotal = Object.keys(groupedItems).reduce((sum, key) => sum + groupedItems[key].totalPrice, 0);
             const formattedTotal = formatTotal(listTotal);
             const today = new Date();
             const dateString = today.toLocaleDateString('es-MX', {
@@ -1311,26 +1457,53 @@
                 </div>
             `;
             
-            quoteList.forEach(item => {
-                const quantityDisplay = item.quantity.toFixed(0);
-                let description = '';
+            // Agregar productos al ticket
+            Object.keys(groupedItems).forEach(key => {
+                const group = groupedItems[key];
                 
-                if (item.material === 'premium_dtf') {
-                    description = `${quantityDisplay} CM ${item.name}`;
-                } else if (PLANILLA_MATERIALS.includes(item.material)) {
-                    description = `${quantityDisplay} PLANILLA ${item.name}`;
+                if (PLANILLA_MATERIALS.includes(group.material)) {
+                    // Para productos de planillas agrupados
+                    ticketHTML += `
+                        <div class="ticket-item">
+                            <div>
+                                <span>${group.totalSheets} PLANILLA ${group.name}</span>
+                                <div style="font-size: 11px; color: #666; margin-top: 2px;">
+                    `;
+                    
+                    // Detallar cada medida dentro del grupo
+                    group.items.forEach(item => {
+                        const stickersTotal = item.sticker_quantity || 0;
+                        ticketHTML += `
+                            <div>${item.width}x${item.height}cm (${stickersTotal} stickers)</div>
+                        `;
+                    });
+                    
+                    ticketHTML += `
+                                </div>
+                            </div>
+                            <span>${formatTotal(group.totalPrice)}</span>
+                        </div>
+                    `;
+                } else if (group.material === 'premium_dtf') {
+                    // Para DTF
+                    ticketHTML += `
+                        <div class="ticket-item">
+                            <span>${group.totalSheets} CM ${group.name}</span>
+                            <span>${formatTotal(group.totalPrice)}</span>
+                        </div>
+                    `;
                 } else {
-                    description = `${quantityDisplay} ${item.name}`;
+                    // Para productos fijos
+                    ticketHTML += `
+                        <div class="ticket-item">
+                            <span>${group.totalSheets} ${group.name}</span>
+                            <span>${formatTotal(group.totalPrice)}</span>
+                        </div>
+                    `;
                 }
-                
-                ticketHTML += `
-                    <div class="ticket-item">
-                        <span>${description}</span>
-                        <span>${formatTotal(item.price)}</span>
-                    </div>
-                `;
             });
             
+            // Agregar total
             ticketHTML += `
                 <div class="ticket-total">
                     <span>TOTAL</span>
