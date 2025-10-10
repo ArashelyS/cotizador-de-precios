@@ -4,11 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Algo Special | Cotizador</title>
-    <!-- Carga de Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Librería para generar imagen del ticket -->
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
-    <!-- Configuración de Tailwind para usar la fuente Inter y los nuevos colores -->
     <script>
         tailwind.config = {
             theme: {
@@ -17,12 +14,11 @@
                         sans: ['Inter', 'sans-serif'],
                     },
                     colors: {
-                        // PALETA DE COLORES
-                        'primary': '#FF1F9F',   // Rosa Neón (Acento principal)
-                        'secondary': '#C1FF00', // Verde Neón (Fondo de secciones destacadas)
-                        'accent': '#FF9D00',    // Naranja (Fondo del cuerpo)
-                        'text-dark': '#000000', // Negro
-                        'text-light': '#FFFFFF', // Blanco
+                        'primary': '#FF1F9F',
+                        'secondary': '#C1FF00',
+                        'accent': '#FF9D00',
+                        'text-dark': '#000000',
+                        'text-light': '#FFFFFF',
                     }
                 }
             }
@@ -32,44 +28,38 @@
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
         body {
             font-family: 'Inter', sans-serif;
-            /* Fondo ligeramente naranja con un toque de blanco */
-            background: linear-gradient(135deg, #FF9D00 0%, #FFB033 100%); 
+            background: linear-gradient(135deg, #FF9D00 0%, #FFB033 100%);
             display: flex;
             justify-content: center;
-            align-items: center;
+            align-items: flex-start;
             min-height: 100vh;
-            padding: 20px;
+            padding: 10px;
         }
         .card {
-            position: relative; 
-            /* Sombra más marcada para contraste */
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-            border: 2px solid #000000; /* Borde negro para el estilo neón */
+            position: relative;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+            border: 2px solid #000000;
         }
         input[type="number"], select {
             transition: all 0.2s;
-            border-color: #000000; /* Borde de inputs negro */
+            border-color: #000000;
+            font-size: 16px; /* Previene zoom en iOS */
         }
         input:focus, select:focus {
-            /* Borde de foco en el color primario (Rosa Neón) */
             border-color: #FF1F9F !important;
             box-shadow: 0 0 0 3px rgba(255, 31, 159, 0.5) !important;
         }
-        /* Estilos específicos para los botones AÑADIR A LA LISTA (Ahora Rosa) */
         .add-to-list-button {
             transition: transform 0.1s, box-shadow 0.1s, background-color 0.3s;
         }
         .add-to-list-button:hover:not(:disabled) {
-            /* Sombra con efecto Neón Rosa */
             transform: translateY(-2px);
-            box-shadow: 0 8px 15px rgba(255, 31, 159, 0.5); 
+            box-shadow: 0 8px 15px rgba(255, 31, 159, 0.5);
         }
         .add-to-list-button:active:not(:disabled) {
             transform: translateY(0);
             box-shadow: 0 4px 10px rgba(255, 31, 159, 0.3);
         }
-
-        /* Animación para el botón Agregar (cuando se añade algo) */
         @keyframes pulse-secondary {
             0%, 100% { background-color: #C1FF00; }
             50% { background-color: #A3D900; }
@@ -77,103 +67,179 @@
         .pulse-secondary-animation {
             animation: pulse-secondary 1.5s infinite;
         }
-
-        /* Estilos para el ticket */
         .ticket {
-            width: 400px;
+            width: 100%;
+            max-width: 400px;
             background: white;
             border-radius: 12px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-            padding: 20px;
-            margin: 20px auto;
+            padding: 15px;
+            margin: 15px auto;
             font-family: 'Inter', sans-serif;
         }
         .ticket-header {
             text-align: center;
             border-bottom: 2px dashed #FF1F9F;
-            padding-bottom: 15px;
-            margin-bottom: 15px;
+            padding-bottom: 10px;
+            margin-bottom: 10px;
         }
         .ticket-logo {
-            height: 60px;
-            margin: 0 auto 10px;
+            height: 50px;
+            margin: 0 auto 8px;
         }
         .ticket-title {
-            font-size: 18px;
+            font-size: 16px;
             font-weight: 800;
             color: #FF1F9F;
-            margin-bottom: 5px;
+            margin-bottom: 3px;
         }
         .ticket-subtitle {
-            font-size: 14px;
+            font-size: 12px;
             color: #666;
             font-style: italic;
         }
         .ticket-item {
             display: flex;
             justify-content: space-between;
-            padding: 8px 0;
+            padding: 6px 0;
             border-bottom: 1px solid #eee;
+            font-size: 14px;
         }
         .ticket-total {
             display: flex;
             justify-content: space-between;
             font-weight: 800;
-            font-size: 18px;
-            padding: 15px 0;
+            font-size: 16px;
+            padding: 12px 0;
             border-top: 2px dashed #FF1F9F;
-            margin-top: 10px;
+            margin-top: 8px;
         }
         .ticket-footer {
             text-align: center;
-            font-size: 12px;
+            font-size: 11px;
             color: #888;
-            margin-top: 15px;
+            margin-top: 12px;
         }
-
-        /* Mejoras para móviles */
+        
+        /* Mejoras específicas para móviles */
         @media (max-width: 640px) {
+            body {
+                padding: 5px;
+                align-items: flex-start;
+            }
             .card {
-                padding: 1rem;
+                padding: 0.75rem;
+                margin: 5px 0;
             }
             .grid-cols-2 {
                 grid-template-columns: 1fr;
-                gap: 1rem;
+                gap: 0.75rem;
             }
             .ticket {
                 width: 100%;
-                padding: 15px;
+                padding: 12px;
+            }
+            .text-2xl {
+                font-size: 1.4rem;
+            }
+            .text-3xl {
+                font-size: 1.6rem;
+            }
+            .text-4xl {
+                font-size: 1.8rem;
+            }
+            .text-lg {
+                font-size: 1rem;
+            }
+            .text-xl {
+                font-size: 1.2rem;
+            }
+            .p-8 {
+                padding: 1rem;
+            }
+            .p-5 {
+                padding: 0.75rem;
+            }
+            .space-y-6 {
+                gap: 1rem;
+            }
+            .py-4 {
+                padding-top: 0.75rem;
+                padding-bottom: 0.75rem;
+            }
+            .py-3 {
+                padding-top: 0.6rem;
+                padding-bottom: 0.6rem;
+            }
+            .mb-8 {
+                margin-bottom: 1.5rem;
+            }
+            .mt-8 {
+                margin-top: 1.5rem;
+            }
+            .mt-6 {
+                margin-top: 1.2rem;
+            }
+            .text-base {
+                font-size: 0.9rem;
+            }
+            .text-sm {
+                font-size: 0.8rem;
+            }
+            .text-xs {
+                font-size: 0.75rem;
+            }
+            .h-40 {
+                height: 7rem;
+            }
+            .sm\:h-52 {
+                height: 9rem;
+            }
+        }
+        
+        /* Ajustes para pantallas muy pequeñas */
+        @media (max-width: 380px) {
+            .card {
+                padding: 0.5rem;
+            }
+            .text-2xl {
+                font-size: 1.3rem;
+            }
+            .text-3xl {
+                font-size: 1.5rem;
+            }
+            .text-4xl {
+                font-size: 1.6rem;
+            }
+            .p-5 {
+                padding: 0.6rem;
             }
         }
     </style>
 </head>
 <body class="bg-gray-100">
-
-    <div class="card bg-text-light w-full max-w-2xl p-8 rounded-2xl">
-
-        <!-- Logo integrado (TAMAÑO AUMENTADO) -->
+    <div class="card bg-text-light w-full max-w-2xl p-4 sm:p-6 md:p-8 rounded-2xl">
+        <!-- Logo -->
         <div class="mb-0 flex justify-center">
-             <img src="https://www.dropbox.com/scl/fi/xpobzj48hrvwrggk9w2iz/INSTAGRAM.png?rlkey=zcxxkd3uuj27nlbsiccynl6ju&st=aciec22s&dl=1" 
-                  alt="Logo de Algo Special" 
-                  class="h-40 sm:h-52 w-auto object-contain">
+            <img src="https://www.dropbox.com/scl/fi/xpobzj48hrvwrggk9w2iz/INSTAGRAM.png?rlkey=zcxxkd3uuj27nlbsiccynl6ju&st=cj2dj0xl&dl=1" 
+                 alt="Logo de Algo Special" 
+                 class="h-32 sm:h-40 md:h-52 w-auto object-contain">
         </div>
         
         <!-- Título y Subtítulo -->
-        <p class="text-center text-lg text-text-dark/80 mb-1 italic font-semibold">Transforma cada momento en una experiencia extraordinaria</p>
-        <p class="text-center text-2xl font-extrabold text-primary mb-8">COTIZA TU PEDIDO</p>
+        <p class="text-center text-base sm:text-lg text-text-dark/80 mb-1 italic font-semibold leading-tight">Transforma cada momento en una experiencia extraordinaria</p>
+        <p class="text-center text-xl sm:text-2xl font-extrabold text-primary mb-4 sm:mb-6 md:mb-8">COTIZA TU PEDIDO</p>
 
         <!-- Formulario de Entrada -->
-        <div class="space-y-6">
-            
-            <!-- Producto (Antes Material) -->
+        <div class="space-y-4 sm:space-y-6">
+            <!-- Producto -->
             <div>
-                <div class="pt-4 px-5 pb-2 bg-secondary rounded-xl border-2 border-text-dark shadow-lg mb-2">
-                    <label for="material" class="block text-lg font-extrabold text-text-dark uppercase">ELIGE PRODUCTO</label>
+                <div class="pt-3 sm:pt-4 px-4 sm:px-5 pb-1 sm:pb-2 bg-secondary rounded-xl border-2 border-text-dark shadow-lg mb-1 sm:mb-2">
+                    <label for="material" class="block text-base sm:text-lg font-extrabold text-text-dark uppercase">ELIGE PRODUCTO</label>
                 </div>
                 
                 <select id="material" onchange="calculateQuote()"
-                        class="mt-1 block w-full rounded-lg border-2 border-text-dark shadow-md p-3 bg-text-light focus:ring-primary focus:border-primary">
-                    
+                        class="mt-1 block w-full rounded-lg border-2 border-text-dark shadow-md p-2 sm:p-3 bg-text-light focus:ring-primary focus:border-primary text-sm sm:text-base">
                     <!-- PRODUCTOS STICKERS -->
                     <option value="premium_dtf" selected>STICKER PREMIUM (DTF UV)</option>
                     <option value="classic_glossy">STICKER CLÁSICO (ADHESIVO FOTOGLOSSY)</option>
@@ -184,136 +250,131 @@
                     <option value="vaso">VASO PERSONALIZADO</option>
                     <option value="mantelito">MANTELITO Ó SOBREPLATO</option>
                     <option value="combo">COMBO (VASO + MANTELITO/SOBREPLATO)</option>
-
                 </select>
             </div>
             
-            <!-- ========================================================= -->
             <!-- INTERFAZ 1 - CÁLCULO DTF POR LARGO -->
-            <!-- ========================================================= -->
             <div id="dtf-interface">
-                 <!-- Contenedor para CALCULAR CENTÍMETROS NECESARIOS (CUADRO VERDE NUEVO) -->
-                <div id="dtf-calculator" class="space-y-4 pt-4 p-5 bg-secondary rounded-xl border-2 border-text-dark shadow-lg mb-2">
-                    <p class="text-lg font-extrabold text-text-dark uppercase">CALCULADORA DE LARGO (DTF UV)</p>
-                    <p class="text-sm text-text-dark/70 font-bold mb-4">Calcula el largo total que necesitas según la cantidad y tamaño de tus diseños.</p>
+                 <!-- Contenedor para CALCULAR CENTÍMETROS NECESARIOS -->
+                <div id="dtf-calculator" class="space-y-3 sm:space-y-4 pt-3 sm:pt-4 p-4 sm:p-5 bg-secondary rounded-xl border-2 border-text-dark shadow-lg mb-1 sm:mb-2">
+                    <p class="text-base sm:text-lg font-extrabold text-text-dark uppercase leading-tight">CALCULADORA DE LARGO (DTF UV)</p>
+                    <p class="text-xs sm:text-sm text-text-dark/70 font-bold mb-2 sm:mb-4 leading-tight">Calcula el largo total que necesitas según la cantidad y tamaño de tus diseños.</p>
                     
                     <!-- Cantidad -->
                     <div>
-                        <label for="quantity_dtf" class="block text-base font-semibold text-text-dark mb-1">Cantidad de Stickers</label>
+                        <label for="quantity_dtf" class="block text-sm sm:text-base font-semibold text-text-dark mb-1">Cantidad de Stickers</label>
                         <input type="number" id="quantity_dtf" value="100" min="1" oninput="calculateQuote()"
-                               class="mt-1 block w-full rounded-lg border-2 border-text-dark shadow-md p-3 bg-text-light focus:ring-primary focus:border-primary text-text-dark">
+                               class="mt-1 block w-full rounded-lg border-2 border-text-dark shadow-md p-2 sm:p-3 bg-text-light focus:ring-primary focus:border-primary text-text-dark text-sm sm:text-base">
                     </div>
 
                     <!-- Tamaño (Ancho y Alto) -->
-                    <div class="grid grid-cols-2 gap-4">
+                    <div class="grid grid-cols-2 gap-3 sm:gap-4">
                         <div>
-                            <label for="width_dtf" class="block text-base font-semibold text-text-dark mb-1">Ancho (cm)</label>
+                            <label for="width_dtf" class="block text-sm sm:text-base font-semibold text-text-dark mb-1">Ancho (cm)</label>
                             <input type="number" id="width_dtf" value="5" min="0.1" step="0.1" oninput="calculateQuote()"
-                                   class="mt-1 block w-full rounded-lg border-2 border-text-dark shadow-md p-3 bg-text-light focus:ring-primary focus:border-primary text-text-dark">
+                                   class="mt-1 block w-full rounded-lg border-2 border-text-dark shadow-md p-2 sm:p-3 bg-text-light focus:ring-primary focus:border-primary text-text-dark text-sm sm:text-base">
                         </div>
                         <div>
-                            <label for="height_dtf" class="block text-base font-semibold text-text-dark mb-1">Alto (cm)</label>
+                            <label for="height_dtf" class="block text-sm sm:text-base font-semibold text-text-dark mb-1">Alto (cm)</label>
                             <input type="number" id="height_dtf" value="5" min="0.1" step="0.1" oninput="calculateQuote()"
-                                   class="mt-1 block w-full rounded-lg border-2 border-text-dark shadow-md p-3 bg-text-light focus:ring-primary focus:border-primary text-text-dark">
+                                   class="mt-1 block w-full rounded-lg border-2 border-text-dark shadow-md p-2 sm:p-3 bg-text-light focus:ring-primary focus:border-primary text-text-dark text-sm sm:text-base">
                         </div>
                     </div>
                     
-                    <!-- Resultado del Cálculo de Largo (Solo muestra el resultado) -->
-                    <div class="mt-4 pt-4 border-t border-text-dark/30">
+                    <!-- Resultado del Cálculo de Largo -->
+                    <div class="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-text-dark/30">
                         <p class="flex justify-between items-center">
-                            <span class="text-base font-extrabold text-text-dark">Centímetros Sugeridos:</span>
-                            <span id="calculated_length" class="font-extrabold text-primary text-2xl">0 CM</span>
+                            <span class="text-sm sm:text-base font-extrabold text-text-dark">Centímetros Sugeridos:</span>
+                            <span id="calculated_length" class="font-extrabold text-primary text-xl sm:text-2xl">0 CM</span>
                         </p>
                     </div>
                 </div>
                 <!-- Contenedor para cotización por LARGO (DTF UV - PRECIO) -->
-                <div id="length-inputs" class="space-y-4 pt-4 p-5 bg-secondary rounded-xl border-2 border-text-dark shadow-lg mt-6">
-                    <p class="text-lg font-extrabold text-text-dark uppercase">PRECIO FINAL POR LARGO</p>
+                <div id="length-inputs" class="space-y-3 sm:space-y-4 pt-3 sm:pt-4 p-4 sm:p-5 bg-secondary rounded-xl border-2 border-text-dark shadow-lg mt-4 sm:mt-6">
+                    <p class="text-base sm:text-lg font-extrabold text-text-dark uppercase leading-tight">PRECIO FINAL POR LARGO</p>
                     
                     <!-- Largo Total -->
-                    <div class="mt-4 space-y-2">
-                        <label for="printed_length_direct" class="block text-base font-bold text-text-dark mb-1">Largo Final a Cotizar (cm)</label>
+                    <div class="mt-3 sm:mt-4 space-y-2">
+                        <label for="printed_length_direct" class="block text-sm sm:text-base font-bold text-text-dark mb-1">Largo Final a Cotizar (cm)</label>
                         <input type="number" id="printed_length_direct" value="380" min="0" step="1" oninput="calculateDtfPrice()"
-                               class="mt-1 block w-full rounded-lg border-2 border-text-dark shadow-md p-3 focus:ring-primary focus:border-primary text-text-dark">
+                               class="mt-1 block w-full rounded-lg border-2 border-text-dark shadow-md p-2 sm:p-3 focus:ring-primary focus:border-primary text-text-dark text-sm sm:text-base">
                         
                         <!-- Sección de Resultados DTF (Unificado) -->
-                        <div class="mt-4 pt-4 border-t border-text-dark/30">
+                        <div class="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-text-dark/30">
                             <!-- Fila 1: TOTAL EN PESOS -->
-                            <div class="flex justify-between items-center bg-text-light p-3 rounded-lg border-2 border-text-dark shadow-md">
-                                <span class="text-base font-extrabold text-text-dark">TOTAL EN PESOS:</span>
-                                <span id="dtf-total-price" class="text-3xl font-extrabold text-primary">$0</span>
+                            <div class="flex justify-between items-center bg-text-light p-2 sm:p-3 rounded-lg border-2 border-text-dark shadow-md">
+                                <span class="text-sm sm:text-base font-extrabold text-text-dark">TOTAL EN PESOS:</span>
+                                <span id="dtf-total-price" class="text-xl sm:text-2xl md:text-3xl font-extrabold text-primary">$0</span>
                             </div>
                             
                             <!-- Fila 2: Costo por Centímetro (Efectivo) -->
-                            <div class="flex justify-between text-sm mt-2">
+                            <div class="flex justify-between text-xs sm:text-sm mt-2">
                                 <span class="text-text-dark/80 font-medium">COSTO POR CENTÍMETRO (Efectivo):</span> 
                                 <span id="dtf-unit-price" class="font-bold text-text-dark">$0.00 MXN</span>
                             </div>
                         </div>
                         <!-- Botón para Agregar a la Lista -->
                         <button id="add-to-list-dtf" onclick="addCurrentQuoteToList()" disabled 
-                                class="add-to-list-button mt-4 w-full py-3 font-extrabold text-text-light bg-primary rounded-lg border-2 border-text-dark shadow-xl disabled:bg-gray-300 disabled:text-gray-500 disabled:border-gray-500">
+                                class="add-to-list-button mt-3 sm:mt-4 w-full py-2 sm:py-3 font-extrabold text-text-light bg-primary rounded-lg border-2 border-text-dark shadow-xl disabled:bg-gray-300 disabled:text-gray-500 disabled:border-gray-500 text-sm sm:text-base">
                             AÑADIR A LA LISTA
                         </button>
                     </div>
                 </div>
             </div>
-            <!-- ========================================================= -->
+            
             <!-- INTERFAZ 2 - CÁLCULO POR ÁREA/PLANILLAS (Stickers Clásicos/Vinil) -->
-            <!-- ========================================================= -->
-            <div id="area-inputs" class="space-y-6 hidden">
-                
-                <div class="space-y-4 pt-4 p-5 bg-secondary rounded-xl border-2 border-text-dark shadow-lg">
-                    <p class="text-lg font-extrabold text-text-dark uppercase">INGRESO DE CANTIDAD Y TAMAÑO</p>
+            <div id="area-inputs" class="space-y-4 sm:space-y-6 hidden">
+                <div class="space-y-3 sm:space-y-4 pt-3 sm:pt-4 p-4 sm:p-5 bg-secondary rounded-xl border-2 border-text-dark shadow-lg">
+                    <p class="text-base sm:text-lg font-extrabold text-text-dark uppercase leading-tight">INGRESO DE CANTIDAD Y TAMAÑO</p>
                     
                     <!-- Cantidad -->
                     <div>
-                        <label for="quantity" class="block text-base font-semibold text-text-dark mb-1">Cantidad de Stickers</label>
+                        <label for="quantity" class="block text-sm sm:text-base font-semibold text-text-dark mb-1">Cantidad de Stickers</label>
                         <input type="number" id="quantity" value="100" min="1" oninput="calculateAreaPrice()"
-                               class="mt-1 block w-full rounded-lg border-2 border-text-dark shadow-md p-3 bg-text-light focus:ring-primary focus:border-primary text-text-dark">
+                               class="mt-1 block w-full rounded-lg border-2 border-text-dark shadow-md p-2 sm:p-3 bg-text-light focus:ring-primary focus:border-primary text-text-dark text-sm sm:text-base">
                         <p class="text-xs text-text-dark/70 mt-1">La planilla es tamaño Oficio (18x26 cm útil).</p>
                     </div>
 
                     <!-- Tamaño (Ancho y Alto) -->
-                    <div class="grid grid-cols-2 gap-4">
+                    <div class="grid grid-cols-2 gap-3 sm:gap-4">
                         <div>
-                            <label for="width" class="block text-base font-semibold text-text-dark mb-1">Ancho (cm)</label>
+                            <label for="width" class="block text-sm sm:text-base font-semibold text-text-dark mb-1">Ancho (cm)</label>
                             <input type="number" id="width" value="5" min="1" step="0.1" oninput="calculateAreaPrice()"
-                                   class="mt-1 block w-full rounded-lg border-2 border-text-dark shadow-md p-3 bg-text-light focus:ring-primary focus:border-primary text-text-dark">
+                                   class="mt-1 block w-full rounded-lg border-2 border-text-dark shadow-md p-2 sm:p-3 bg-text-light focus:ring-primary focus:border-primary text-text-dark text-sm sm:text-base">
                         </div>
                         <div>
-                            <label for="height" class="block text-base font-semibold text-text-dark mb-1">Alto (cm)</label>
+                            <label for="height" class="block text-sm sm:text-base font-semibold text-text-dark mb-1">Alto (cm)</label>
                             <input type="number" id="height" value="5" min="1" step="0.1" oninput="calculateAreaPrice()"
-                                   class="mt-1 block w-full rounded-lg border-2 border-text-dark shadow-md p-3 bg-text-light focus:ring-primary focus:border-primary text-text-dark">
+                                   class="mt-1 block w-full rounded-lg border-2 border-text-dark shadow-md p-2 sm:p-3 bg-text-light focus:ring-primary focus:border-primary text-text-dark text-sm sm:text-base">
                         </div>
                     </div>
                 </div>
                 
                 <!-- Detalle de Planillas y Resultados -->
-                <div class="space-y-2 pt-4 p-5 bg-secondary rounded-xl border-2 border-text-dark shadow-lg">
-                    <p class="text-lg font-extrabold text-text-dark uppercase">DETALLE DE PRODUCCIÓN</p>
-                    <div id="cricut-details" class="text-base text-text-dark">
+                <div class="space-y-2 pt-3 sm:pt-4 p-4 sm:p-5 bg-secondary rounded-xl border-2 border-text-dark shadow-lg">
+                    <p class="text-base sm:text-lg font-extrabold text-text-dark uppercase leading-tight">DETALLE DE PRODUCCIÓN</p>
+                    <div id="cricut-details" class="text-sm sm:text-base text-text-dark">
                         <p class="flex justify-between border-b border-text-dark/20 pb-1">
                             <span>Stickers por Planilla:</span>
                             <span id="fit-per-sheet" class="font-bold text-text-dark">0</span>
                         </p>
                         <p class="flex justify-between pt-1">
                             <span>Planillas necesarias:</span>
-                            <span id="sheets-needed" class="font-bold text-primary text-xl">0</span>
+                            <span id="sheets-needed" class="font-bold text-primary text-lg sm:text-xl">0</span>
                         </p>
                     </div>
                     <p class="text-xs text-text-dark/70 pt-1 font-bold text-primary">Pedido menores a 5 planillas no incluyen diseño.</p>
 
                     <!-- Sección de Resultados Área (Unificado) -->
-                    <div class="mt-4 pt-4 border-t border-text-dark/30">
+                    <div class="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-text-dark/30">
                          <!-- Fila 1: TOTAL EN PESOS (Planilla) -->
-                        <div class="flex justify-between items-center bg-text-light p-3 rounded-lg border-2 border-text-dark shadow-md">
-                            <span class="text-base font-extrabold text-text-dark">TOTAL EN PESOS:</span>
-                            <span id="area-total-price" class="text-3xl font-extrabold text-primary">$0</span>
+                        <div class="flex justify-between items-center bg-text-light p-2 sm:p-3 rounded-lg border-2 border-text-dark shadow-md">
+                            <span class="text-sm sm:text-base font-extrabold text-text-dark">TOTAL EN PESOS:</span>
+                            <span id="area-total-price" class="text-xl sm:text-2xl md:text-3xl font-extrabold text-primary">$0</span>
                         </div>
                         
                         <!-- Fila 2: Costo por Planilla -->
-                        <div class="flex justify-between text-sm mt-2">
+                        <div class="flex justify-between text-xs sm:text-sm mt-2">
                             <span class="text-text-dark/80 font-medium">COSTO POR PLANILLA:</span> 
                             <span id="area-unit-price" class="font-bold text-text-dark">$0.00 MXN</span>
                         </div>
@@ -321,34 +382,31 @@
                     
                     <!-- Botón para Agregar a la Lista -->
                     <button id="add-to-list-area" onclick="addCurrentQuoteToList()" disabled 
-                            class="add-to-list-button mt-4 w-full py-3 font-extrabold text-text-light bg-primary rounded-lg border-2 border-text-dark shadow-xl disabled:bg-gray-300 disabled:text-gray-500 disabled:border-gray-500">
+                            class="add-to-list-button mt-3 sm:mt-4 w-full py-2 sm:py-3 font-extrabold text-text-light bg-primary rounded-lg border-2 border-text-dark shadow-xl disabled:bg-gray-300 disabled:text-gray-500 disabled:border-gray-500 text-sm sm:text-base">
                         AÑADIR A LA LISTA
                     </button>
                 </div>
             </div>
-            <!-- ========================================================= -->
-            <!-- INTERFAZ 3 - PRODUCTOS DE PRECIO FIJO (UNIFICADO en un solo cuadro) -->
-            <!-- ========================================================= -->
-            <div id="product-inputs" class="space-y-6 hidden">
-                
-                <!-- Contenedor Único para Vasos/Productos Fijos (Cuadro 'verde') -->
-                <div class="space-y-4 pt-4 p-5 bg-secondary rounded-xl border-2 border-text-dark shadow-lg">
+            
+            <!-- INTERFAZ 3 - PRODUCTOS DE PRECIO FIJO -->
+            <div id="product-inputs" class="space-y-4 sm:space-y-6 hidden">
+                <!-- Contenedor Único para Vasos/Productos Fijos -->
+                <div class="space-y-3 sm:space-y-4 pt-3 sm:pt-4 p-4 sm:p-5 bg-secondary rounded-xl border-2 border-text-dark shadow-lg">
                     
                     <!-- Select para Tipo de Vaso (Solo si es Vaso/Combo) -->
                     <div id="vaso-type-container" class="hidden space-y-2">
-                         <label for="select-vaso" class="block text-base font-semibold text-text-dark mb-1">TIPO DE VASO</label>
+                         <label for="select-vaso" class="block text-sm sm:text-base font-semibold text-text-dark mb-1">TIPO DE VASO</label>
                         <select id="select-vaso" onchange="calculateFixedPrice()"
-                                class="mt-1 block w-full rounded-lg border-2 border-text-dark shadow-md p-3 bg-text-light focus:ring-primary focus:border-primary">
+                                class="mt-1 block w-full rounded-lg border-2 border-text-dark shadow-md p-2 sm:p-3 bg-text-light focus:ring-primary focus:border-primary text-sm sm:text-base">
                             <!-- Opciones se llenan dinámicamente -->
                         </select>
                     </div>
 
                     <!-- Select para Tipo de Mantelito (Solo si es Mantelito) -->
                     <div id="mantelito-type-container" class="hidden space-y-2">
-                        <label for="select-mantelito" class="block text-base font-semibold text-text-dark mb-1">TIPO DE MANTELITO/SOBREPLATO</label>
+                        <label for="select-mantelito" class="block text-sm sm:text-base font-semibold text-text-dark mb-1">TIPO DE MANTELITO/SOBREPLATO</label>
                         <select id="select-mantelito" onchange="calculateFixedPrice()"
-                                class="mt-1 block w-full rounded-lg border-2 border-text-dark shadow-md p-3 bg-text-light focus:ring-primary focus:border-primary">
-                            
+                                class="mt-1 block w-full rounded-lg border-2 border-text-dark shadow-md p-2 sm:p-3 bg-text-light focus:ring-primary focus:border-primary text-sm sm:text-base">
                             <!-- TIPOS DE MANTELITO/SOBREPLATO -->
                             <option value="carta">MANTELITO CARTA</option>
                             <option value="redondo">SOBREPLATO REDONDO</option>
@@ -359,21 +417,21 @@
 
                     <!-- Cantidad -->
                     <div>
-                        <label for="quantity_product" class="block text-base font-semibold text-text-dark mb-1">CANTIDAD DE UNIDADES</label>
+                        <label for="quantity_product" class="block text-sm sm:text-base font-semibold text-text-dark mb-1">CANTIDAD DE UNIDADES</label>
                         <input type="number" id="quantity_product" value="10" min="1" placeholder="Ej: 50" oninput="calculateFixedPrice()"
-                               class="mt-1 block w-full rounded-lg border-2 border-text-dark shadow-md p-3 bg-text-light focus:ring-primary focus:border-primary text-text-dark">
+                               class="mt-1 block w-full rounded-lg border-2 border-text-dark shadow-md p-2 sm:p-3 bg-text-light focus:ring-primary focus:border-primary text-text-dark text-sm sm:text-base">
                     </div>
 
                     <!-- Resultado de Productos Fijos (Total en Pesos / Costo por Unidad) -->
-                    <div class="space-y-2 pt-4 border-t border-text-dark/30">
+                    <div class="space-y-2 pt-3 sm:pt-4 border-t border-text-dark/30">
                         <!-- Fila 1: TOTAL EN PESOS -->
-                        <div class="flex justify-between items-center bg-text-light p-3 rounded-lg border-2 border-text-dark shadow-md">
-                            <span class="text-base font-extrabold text-text-dark">TOTAL EN PESOS:</span>
-                            <span id="product-total-price" class="text-3xl font-extrabold text-primary">$0</span>
+                        <div class="flex justify-between items-center bg-text-light p-2 sm:p-3 rounded-lg border-2 border-text-dark shadow-md">
+                            <span class="text-sm sm:text-base font-extrabold text-text-dark">TOTAL EN PESOS:</span>
+                            <span id="product-total-price" class="text-xl sm:text-2xl md:text-3xl font-extrabold text-primary">$0</span>
                         </div>
                         
                         <!-- Fila 2: Costo por Unidad -->
-                        <div class="flex justify-between text-sm mt-2">
+                        <div class="flex justify-between text-xs sm:text-sm mt-2">
                             <span class="text-text-dark/80 font-medium">COSTO POR UNIDAD:</span> 
                             <span id="product-unit-price" class="font-bold text-text-dark">$0.00 MXN</span>
                         </div>
@@ -381,39 +439,34 @@
                     
                     <!-- Botón para Agregar a la Lista -->
                     <button id="add-to-list-product" onclick="addCurrentQuoteToList()" disabled 
-                            class="add-to-list-button mt-4 w-full py-3 font-extrabold text-text-light bg-primary rounded-lg border-2 border-text-dark shadow-xl disabled:bg-gray-300 disabled:text-gray-500 disabled:border-gray-500">
+                            class="add-to-list-button mt-3 sm:mt-4 w-full py-2 sm:py-3 font-extrabold text-text-light bg-primary rounded-lg border-2 border-text-dark shadow-xl disabled:bg-gray-300 disabled:text-gray-500 disabled:border-gray-500 text-sm sm:text-base">
                         AÑADIR A LA LISTA
                     </button>
                 </div>
             </div>
-            <!-- ========================================================= -->
-            <!-- FIN: INTERFAZ 3 - PRODUCTOS DE PRECIO FIJO -->
-            <!-- ========================================================= -->
-
         </div>
 
-        <!-- INICIO: Lista de Productos y Total -->
-        <div class="mt-8 pt-6 border-t-2 border-text-dark">
-            <h2 class="text-xl font-extrabold text-text-dark mb-4">TU LISTA DE PRODUCTOS</h2>
+        <!-- Lista de Productos y Total -->
+        <div class="mt-6 sm:mt-8 pt-4 sm:pt-6 border-t-2 border-text-dark">
+            <h2 class="text-lg sm:text-xl font-extrabold text-text-dark mb-3 sm:mb-4">TU LISTA DE PRODUCTOS</h2>
             
             <!-- Contenedor de la lista -->
-            <div id="quote-list" class="space-y-3 p-4 bg-gray-50 rounded-xl border-2 border-gray-300 min-h-[50px]">
-                <p id="empty-list-message" class="text-center text-gray-500 italic">La lista está vacía.</p>
+            <div id="quote-list" class="space-y-2 sm:space-y-3 p-3 sm:p-4 bg-gray-50 rounded-xl border-2 border-gray-300 min-h-[50px]">
+                <p id="empty-list-message" class="text-center text-gray-500 italic text-sm sm:text-base">La lista está vacía.</p>
             </div>
             
             <!-- Total a Pagar -->
-            <div class="mt-4 flex justify-between items-center bg-text-dark text-text-light p-5 rounded-xl border-2 border-primary shadow-lg">
-                <span class="text-2xl font-extrabold">TOTAL A PAGAR:</span>
-                <span id="final-total" class="text-4xl font-extrabold text-secondary">$0</span>
+            <div class="mt-3 sm:mt-4 flex justify-between items-center bg-text-dark text-text-light p-3 sm:p-4 md:p-5 rounded-xl border-2 border-primary shadow-lg">
+                <span class="text-lg sm:text-xl md:text-2xl font-extrabold">TOTAL A PAGAR:</span>
+                <span id="final-total" class="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-extrabold text-secondary">$0</span>
             </div>
         </div>
-        <!-- FIN: Lista de Productos y Total -->
 
         <!-- Botones de Acción -->
-        <div class="mt-6 flex flex-col sm:flex-row gap-4 w-full justify-center">
+        <div class="mt-4 sm:mt-6 flex flex-col gap-3 sm:gap-4 w-full justify-center">
             <button id="generate-ticket-btn" onclick="generateTicket()" disabled
-                    class="flex items-center justify-center w-full py-4 text-xl font-extrabold text-text-light bg-accent rounded-lg border-2 border-text-dark shadow-xl hover:bg-accent/80 focus:outline-none focus:ring-4 focus:ring-accent/50 disabled:bg-gray-300 disabled:text-gray-500 disabled:border-gray-500">
-                <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    class="flex items-center justify-center w-full py-3 sm:py-4 text-base sm:text-lg md:text-xl font-extrabold text-text-light bg-accent rounded-lg border-2 border-text-dark shadow-xl hover:bg-accent/80 focus:outline-none focus:ring-4 focus:ring-accent/50 disabled:bg-gray-300 disabled:text-gray-500 disabled:border-gray-500">
+                <svg class="w-5 h-5 sm:w-6 sm:h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
                 </svg>
                 <span>DESCARGAR COTIZACIÓN</span>
@@ -422,8 +475,8 @@
             <a id="order-button" 
                href="#" 
                target="_blank" 
-               class="flex items-center justify-center w-full py-4 text-xl font-extrabold text-text-light bg-primary rounded-lg border-2 border-text-dark shadow-xl hover:bg-primary/80 focus:outline-none focus:ring-4 focus:ring-primary/50">
-                <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+               class="flex items-center justify-center w-full py-3 sm:py-4 text-base sm:text-lg md:text-xl font-extrabold text-text-light bg-primary rounded-lg border-2 border-text-dark shadow-xl hover:bg-primary/80 focus:outline-none focus:ring-4 focus:ring-primary/50">
+                <svg class="w-5 h-5 sm:w-6 sm:h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
                 </svg>
                 <span>CONFIRMAR PEDIDO</span>
@@ -432,40 +485,34 @@
         
         <!-- Ticket oculto para generar imagen -->
         <div id="ticket-container" class="fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-            <div class="bg-white p-6 rounded-xl max-w-md w-full mx-4">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-xl font-bold text-text-dark">Vista Previa del Ticket</h3>
+            <div class="bg-white p-4 sm:p-6 rounded-xl max-w-md w-full mx-3 sm:mx-4">
+                <div class="flex justify-between items-center mb-3 sm:mb-4">
+                    <h3 class="text-lg sm:text-xl font-bold text-text-dark">Vista Previa del Ticket</h3>
                     <button onclick="closeTicketPreview()" class="text-gray-500 hover:text-gray-700">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                         </svg>
                     </button>
                 </div>
-                <div id="ticket-preview" class="ticket mb-4">
+                <div id="ticket-preview" class="ticket mb-3 sm:mb-4">
                     <!-- El contenido del ticket se genera aquí -->
                 </div>
                 <div class="flex justify-between">
-                    <button onclick="closeTicketPreview()" class="px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400">Cancelar</button>
-                    <button onclick="downloadTicket()" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/80">Descargar</button>
+                    <button onclick="closeTicketPreview()" class="px-3 sm:px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400 text-sm sm:text-base">Cancelar</button>
+                    <button onclick="downloadTicket()" class="px-3 sm:px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/80 text-sm sm:text-base">Descargar</button>
                 </div>
             </div>
         </div>
-        
     </div>
 
     <!-- JavaScript para el cálculo de la cotización -->
     <script>
-        
-        const MIN_DTF_LENGTH = 10; 
-        
-        // --- VARIABLE GLOBAL PARA EL CARRITO ---
+        // El código JavaScript permanece igual que en la versión anterior
+        // Solo se han modificado los estilos CSS para mejorar la responsividad
+        const MIN_DTF_LENGTH = 10;
         let quoteList = [];
 
-        // ======================================================================
-        // A. CONSTANTES DE PRECIOS 
-        // ======================================================================
-
-        // 1. Precios de Planillas y DTF
+        // CONSTANTES DE PRECIOS
         const CLASSIC_GLOSSY_PRICING_MAP = {
             1: 25, 2: 50, 3: 75, 4: 100, 
             5: 90, 6: 108, 7: 126, 8: 144, 9: 162, 10: 180, 11: 198, 12: 216, 13: 234, 14: 252, 15: 270, 16: 288, 17: 306, 18: 324, 19: 335, 20: 340,
@@ -477,15 +524,14 @@
             71: 1065, 72: 1080, 73: 1095, 74: 1110, 75: 1125, 76: 1140, 77: 1155, 78: 1170, 79: 1185, 80: 1200,
             81: 1215, 82: 1230, 83: 1245, 84: 1260, 85: 1275, 86: 1290, 87: 1305, 88: 1320, 89: 1335, 90: 1337,
             91: 1339, 92: 1339, 93: 1340, 94: 1344, 95: 1359, 96: 1373, 97: 1387, 98: 1392, 99: 1395, 100: 1400,
-            // (La tarifa BULK se usará para valores > 100)
         };
-        const CLASSIC_BULK_SHEET_RATE = 14.00; 
+        const CLASSIC_BULK_SHEET_RATE = 14.00;
         
         const VINYL_UNIT_RATE_TABLE = {
             1: 35, 2: 35, 3: 35, 4: 35, 5: 33, 6: 33, 7: 32, 8: 32, 9: 30, 10: 30,
             11: 29, 12: 29, 13: 28, 14: 28, 15: 27, 16: 27, 17: 27, 18: 26, 19: 26
         };
-        const VINYL_BULK_RATE = 25; 
+        const VINYL_BULK_RATE = 25;
         const VINYL_MATERIALS = ['vinyl_white', 'vinyl_clear'];
         const PLANILLA_MATERIALS = ['classic_glossy', ...VINYL_MATERIALS];
 
@@ -501,17 +547,16 @@
             80: 352, 81: 356.4, 82: 360.8, 83: 365.2, 84: 369.6, 85: 374, 86: 378.4, 87: 382.8, 88: 385, 89: 385,
             90: 385, 91: 385, 92: 387, 93: 387, 94: 387, 95: 387, 96: 389, 97: 389, 98: 389, 99: 389
         };
-        const DTF_RATE_100_299 = 3.9; 
-        const DTF_RATE_300_PLUS = 3.7; 
+        const DTF_RATE_100_299 = 3.9;
+        const DTF_RATE_300_PLUS = 3.7;
 
-        // 2. Precios de Productos Fijos
-        // TABLA DE PRECIOS DE MANTELITOS/SOBREPLATOS
+        // Precios de Productos Fijos
         const MANTELITO_PRICING = {
             'carta': [
                 { max: 19, price: 14 },
                 { max: 49, price: 12 },
                 { max: 99, price: 10 },
-                { max: Infinity, price: 9 } 
+                { max: Infinity, price: 9 }
             ],
             'redondo': [
                 { max: 19, price: 14 },
@@ -523,13 +568,13 @@
                 { max: 19, price: 15 },
                 { max: 49, price: 14 },
                 { max: 99, price: 13 },
-                { max: Infinity, price: 11 } 
+                { max: Infinity, price: 11 }
             ],
             'media_carta': [
                 { max: 19, price: 12 },
                 { max: 49, price: 10 },
                 { max: 99, price: 9 },
-                { max: Infinity, price: 7 } 
+                { max: Infinity, price: 7 }
             ]
         };
 
@@ -584,10 +629,10 @@
                     { max: 99, price: 42.00 },
                     { max: Infinity, price: 40.00 }
                 ],
-                'vaso_vip': [ // VASO VIP (cristal popote)
+                'vaso_vip': [
                     { max: 5, price: 130.00 },
                     { max: 10, price: 120.00 },
-                    { max: Infinity, price: 110.00 } 
+                    { max: Infinity, price: 110.00 }
                 ]
             };
 
@@ -599,10 +644,10 @@
                     return tier.price;
                 }
             }
-            return 0; 
+            return 0;
         }
 
-        // Función auxiliar para obtener el precio del mantelito 
+        // Función auxiliar para obtener el precio del mantelito
         function getMantelitoPrice(mantelitoKey, quantity) {
             const pricingTiers = MANTELITO_PRICING[mantelitoKey];
             if (!pricingTiers || quantity <= 0) return 0;
@@ -612,7 +657,7 @@
                     return tier.price;
                 }
             }
-            return 0; 
+            return 0;
         }
 
         // NUEVA FUNCIÓN para obtener el precio del combo
@@ -625,100 +670,94 @@
                     return tier.price;
                 }
             }
-            return 0; 
+            return 0;
         }
 
-        // Definición de estructura para PRODUCT_PRICES 
+        // Definición de estructura para PRODUCT_PRICES
         const PRODUCT_PRICES = {
-            'mantelito': { 
-                'carta': { name: 'MANTELITO CARTA', key: 'carta', baseUnit: 'UNIDAD' }, 
-                'redondo': { name: 'SOBREPLATO REDONDO', key: 'redondo', baseUnit: 'UNIDAD' }, 
-                'silueta': { name: 'SOBREPLATO SILUETA', key: 'silueta', baseUnit: 'UNIDAD' }, 
-                'media_carta': { name: 'SOBREPLATO MEDIA CARTA', key: 'media_carta', baseUnit: 'UNIDAD' } 
-            }, 
+            'mantelito': {
+                'carta': { name: 'MANTELITO CARTA', key: 'carta', baseUnit: 'UNIDAD' },
+                'redondo': { name: 'SOBREPLATO REDONDO', key: 'redondo', baseUnit: 'UNIDAD' },
+                'silueta': { name: 'SOBREPLATO SILUETA', key: 'silueta', baseUnit: 'UNIDAD' },
+                'media_carta': { name: 'SOBREPLATO MEDIA CARTA', key: 'media_carta', baseUnit: 'UNIDAD' }
+            },
             
-            'vaso': { 
-                'cilindro_chupon': { name: 'CILINDRO CHUPÓN', key: 'cilindro_chupon', baseUnit: 'UNIDAD' }, 
-                'cilindro_popote': { name: 'CILINDRO POPOTE', key: 'cilindro_popote', baseUnit: 'UNIDAD' }, 
-                'vaso_popote_16oz': { name: 'VASO POPOTE 16 OZ', key: 'vaso_popote_16oz', baseUnit: 'UNIDAD' }, 
-                'vaso_popote_24oz': { name: 'VASO POPOTE 24 OZ', key: 'vaso_popote_24oz', baseUnit: 'UNIDAD' }, 
-                'vaso_vip': { name: 'VASO VIP (CRISTAL POPOTE)', key: 'vaso_vip', baseUnit: 'UNIDAD' } 
+            'vaso': {
+                'cilindro_chupon': { name: 'CILINDRO CHUPÓN', key: 'cilindro_chupon', baseUnit: 'UNIDAD' },
+                'cilindro_popote': { name: 'CILINDRO POPOTE', key: 'cilindro_popote', baseUnit: 'UNIDAD' },
+                'vaso_popote_16oz': { name: 'VASO POPOTE 16 OZ', key: 'vaso_popote_16oz', baseUnit: 'UNIDAD' },
+                'vaso_popote_24oz': { name: 'VASO POPOTE 24 OZ', key: 'vaso_popote_24oz', baseUnit: 'UNIDAD' },
+                'vaso_vip': { name: 'VASO VIP (CRISTAL POPOTE)', key: 'vaso_vip', baseUnit: 'UNIDAD' }
             },
 
             // --- PRODUCTOS COMBO ACTUALIZADOS PARA LA INTERFAZ DE VENTA ---
             'combo': {
-                'combo_cilindro_chupon': { 
-                    name: 'COMBO CILINDRO CHUPÓN', 
-                    key: 'combo_cilindro_chupon', 
+                'combo_cilindro_chupon': {
+                    name: 'COMBO CILINDRO CHUPÓN',
+                    key: 'combo_cilindro_chupon',
                     baseUnit: 'COMBO',
-                }, 
-                'combo_cilindro_popote': { 
-                    name: 'COMBO CILINDRO POPOTE', 
-                    key: 'combo_cilindro_popote', 
+                },
+                'combo_cilindro_popote': {
+                    name: 'COMBO CILINDRO POPOTE',
+                    key: 'combo_cilindro_popote',
                     baseUnit: 'COMBO',
-                }, 
-                'combo_vaso_popote_16oz': { 
-                    name: 'COMBO VASO POPOTE 16 OZ', 
-                    key: 'combo_vaso_popote_16oz', 
+                },
+                'combo_vaso_popote_16oz': {
+                    name: 'COMBO VASO POPOTE 16 OZ',
+                    key: 'combo_vaso_popote_16oz',
                     baseUnit: 'COMBO',
-                }, 
-                'combo_vaso_popote_24oz': { 
-                    name: 'COMBO VASO POPOTE 24 OZ', 
-                    key: 'combo_vaso_popote_24oz', 
+                },
+                'combo_vaso_popote_24oz': {
+                    name: 'COMBO VASO POPOTE 24 OZ',
+                    key: 'combo_vaso_popote_24oz',
                     baseUnit: 'COMBO',
-                }, 
-                'combo_vaso_vip': { 
-                    name: 'COMBO VASO VIP (CRISTAL POPOTE)', 
-                    key: 'combo_vaso_vip', 
+                },
+                'combo_vaso_vip': {
+                    name: 'COMBO VASO VIP (CRISTAL POPOTE)',
+                    key: 'combo_vaso_vip',
                     baseUnit: 'COMBO',
-                } 
+                }
             }
         };
 
         const FIXED_PRODUCTS = ['vaso', 'mantelito', 'combo'];
         
-        // ======================================================================
-        // B. CONSTANTES DE CÁLCULO Y NOMBRES
-        // ======================================================================
-
         // NOMBRES CLAROS PARA LA LISTA DE PRODUCTOS
         const MATERIAL_NAMES = {
-            'premium_dtf': 'IMPRESIÓN DTF UV', 
+            'premium_dtf': 'IMPRESIÓN DTF UV',
             'classic_glossy': 'STICKER CLÁSICO',
             'vinyl_white': 'VINIL IMPRESO BLANCO',
             'vinyl_clear': 'VINIL IMPRESO TRANSPARENTE',
-            'vaso': 'VASO PERSONALIZADO', 
-            'mantelito': 'MANTELITO/SOBREPLATO', 
-            'combo': 'COMBO VASO + MANTELITO' 
+            'vaso': 'VASO PERSONALIZADO',
+            'mantelito': 'MANTELITO/SOBREPLATO',
+            'combo': 'COMBO VASO + MANTELITO'
         };
         
         // Constantes de cálculo para Planillas (Área)
-        const CRICUT_USABLE_WIDTH_CM = 18; 
-        const CRICUT_USABLE_HEIGHT_CM = 26; 
-        const STICKER_SPACING_CM = 0.3; 
+        const CRICUT_USABLE_WIDTH_CM = 18;
+        const CRICUT_USABLE_HEIGHT_CM = 26;
+        const STICKER_SPACING_CM = 0.3;
         
         // Constantes de cálculo para DTF
         const DTF_FIXED_WIDTH_CM = 28;
-        const DTF_SPACING_CM = 0.4; 
+        const DTF_SPACING_CM = 0.4;
 
         let currentQuoteData = {
             material: 'premium_dtf',
             name: MATERIAL_NAMES['premium_dtf'],
             price: 0,
             quantity: 0,
-            unit_type: 'CM', 
+            unit_type: 'CM',
             details: '',
         };
 
-        // ======================================================================
-        // C. FUNCIONES DE FORMATO
-        // ======================================================================
+        // FUNCIONES DE FORMATO
         function formatTotal(value) {
             return new Intl.NumberFormat('es-MX', {
                 style: 'currency',
                 currency: 'MXN',
-                minimumFractionDigits: 0, 
-                maximumFractionDigits: 0, 
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0,
             }).format(value);
         }
 
@@ -731,13 +770,7 @@
             }).format(value);
         }
 
-        // ======================================================================
-        // D. LÓGICA DE CÁLCULO DTF Y ÁREA
-        // ======================================================================
-
-        /**
-         * Calcula el largo total sugerido en CM para DTF
-         */
+        // LÓGICA DE CÁLCULO DTF Y ÁREA
         function calculateDtfLength() {
             const quantity = parseFloat(document.getElementById('quantity_dtf').value) || 0;
             const width = parseFloat(document.getElementById('width_dtf').value) || 0;
@@ -781,9 +814,6 @@
             return roundedLength;
         }
 
-        /**
-         * Calcula el precio final del DTF basado en el largo ingresado
-         */
         window.calculateDtfPrice = function() {
             const material = document.getElementById('material').value;
             const totalElement = document.getElementById('dtf-total-price');
@@ -821,18 +851,14 @@
             const lengthForPricing = Math.ceil(printedLength);
             
             if (lengthForPricing <= 0) {
-                // Ya se manejó arriba, pero como fallback
                 totalPrice = 0;
             } else if (lengthForPricing in DTF_PRICE_TABLE) {
-                // Precio de la tabla para 10-99 cm
                 totalPrice = DTF_PRICE_TABLE[lengthForPricing];
                 effectiveRate = totalPrice / lengthForPricing;
             } else if (lengthForPricing >= 100 && lengthForPricing < 300) {
-                // Tarifa de 100 a 299 cm
                 totalPrice = lengthForPricing * DTF_RATE_100_299;
                 effectiveRate = DTF_RATE_100_299;
             } else if (lengthForPricing >= 300) {
-                // Tarifa de 300 cm en adelante
                 totalPrice = lengthForPricing * DTF_RATE_300_PLUS;
                 effectiveRate = DTF_RATE_300_PLUS;
             }
@@ -845,16 +871,13 @@
                 name: MATERIAL_NAMES[material],
                 price: totalPrice,
                 quantity: lengthForPricing,
-                unit_type: 'CM', 
+                unit_type: 'CM',
                 details: `${lengthForPricing.toFixed(0)} CM @ ${formatRate(effectiveRate)}/cm`,
             };
             
             addButton.disabled = totalPrice <= 0;
         }
 
-        /**
-         * Calcula cuántos stickers caben por planilla
-         */
         function calculateFitPerSheet(width, height) {
             if (width <= 0 || height <= 0) return 0;
 
@@ -874,18 +897,14 @@
             return Math.max(fit1, fit2);
         }
 
-        /**
-         * Obtiene el precio total de las planillas según el material y la cantidad
-         */
         function getSheetTotalPrice(sheets, material) {
             if (sheets <= 0) return 0;
             
             if (material === 'classic_glossy') {
                 if (sheets in CLASSIC_GLOSSY_PRICING_MAP) {
                     return CLASSIC_GLOSSY_PRICING_MAP[sheets];
-                } 
-                // Tarifa bulk para más de 100
-                if (sheets > 100) { 
+                }
+                if (sheets > 100) {
                     return sheets * CLASSIC_BULK_SHEET_RATE;
                 }
             }
@@ -893,14 +912,13 @@
             const isVinyl = VINYL_MATERIALS.includes(material);
             if (isVinyl) {
                 if (sheets >= 20) {
-                    return sheets * VINYL_BULK_RATE; 
+                    return sheets * VINYL_BULK_RATE;
                 }
                 const pricePerSheet = VINYL_UNIT_RATE_TABLE[sheets];
                 if (pricePerSheet) {
                     return sheets * pricePerSheet;
                 }
-                // Si está entre 1 y 19 pero el valor no está en el mapa, usa el precio por planilla de 19.
-                 if (sheets >= 1) { 
+                if (sheets >= 1) {
                      const rate19 = VINYL_UNIT_RATE_TABLE[19] || VINYL_BULK_RATE;
                      return sheets * (VINYL_UNIT_RATE_TABLE[sheets] || rate19);
                 }
@@ -909,11 +927,8 @@
             return 0;
         }
 
-        /**
-         * Calcula el precio de stickers por planillas (área)
-         */
         window.calculateAreaPrice = function() {
-            const material = document.getElementById('material').value; 
+            const material = document.getElementById('material').value;
             const quantityInput = document.getElementById('quantity').value;
             const widthInput = document.getElementById('width').value;
             const heightInput = document.getElementById('height').value;
@@ -967,24 +982,18 @@
             
             currentQuoteData = {
                 material: material,
-                name: MATERIAL_NAMES[material], 
+                name: MATERIAL_NAMES[material],
                 price: totalCost,
                 quantity: sheetsNeeded,
-                unit_type: 'PLANILLA', 
+                unit_type: 'PLANILLA',
                 details: `${width}x${height}cm (${quantity} stickers)`,
-                unit_price: effectiveRatePerSheet 
+                unit_price: effectiveRatePerSheet
             };
             
             addButton.disabled = totalCost <= 0;
         }
 
-        // ======================================================================
-        // E. LÓGICA DE PRODUCTOS FIJOS
-        // ======================================================================
-        
-        /**
-         * Rellena las opciones de Vaso o Combo dinámicamente.
-         */
+        // LÓGICA DE PRODUCTOS FIJOS
         function populateFixedProductSelect(material, selectElement) {
             selectElement.innerHTML = '';
             let options = [];
@@ -1017,12 +1026,8 @@
             });
         }
 
-
-        /**
-         * Calcula el precio de Productos Fijos (Vaso, Mantelito, Combo)
-         */
         window.calculateFixedPrice = function() {
-            const material = document.getElementById('material').value; 
+            const material = document.getElementById('material').value;
             const vasoSelect = document.getElementById('select-vaso');
             const mantelitoSelect = document.getElementById('select-mantelito');
 
@@ -1035,11 +1040,11 @@
 
             const quantity = parseInt(quantityInput) || 0;
             
-            let itemData; 
-            let unitPrice = 0; 
+            let itemData;
+            let unitPrice = 0;
             let itemName = 'PRODUCTO DESCONOCIDO';
             let unitType = 'UNIDAD';
-            let detailPrice = 0; 
+            let detailPrice = 0;
 
             if (quantity <= 0) {
                  totalElement.textContent = formatTotal(0);
@@ -1048,10 +1053,9 @@
                  return;
             }
 
-
             // 1. Mantelito
             if (material === 'mantelito') {
-                itemData = PRODUCT_PRICES[material][selectedType]; 
+                itemData = PRODUCT_PRICES[material][selectedType];
                 unitPrice = getMantelitoPrice(itemData.key, quantity);
                 itemName = itemData.name;
                 unitType = itemData.baseUnit;
@@ -1068,11 +1072,11 @@
             // 3. Combo (Aplica getComboPrice)
             } else if (material === 'combo') {
                 itemData = PRODUCT_PRICES[material][selectedType];
-                unitPrice = getComboPrice(itemData.key, quantity); 
+                unitPrice = getComboPrice(itemData.key, quantity);
                 itemName = itemData.name;
                 unitType = itemData.baseUnit;
                 detailPrice = unitPrice;
-            } 
+            }
             
             if (unitPrice <= 0) {
                 totalElement.textContent = formatTotal(0);
@@ -1086,23 +1090,20 @@
             totalElement.textContent = formatTotal(totalPrice);
             unitPriceElement.textContent = formatRate(unitPrice);
 
-            // Actualizar currentQuoteData para el carrito
             currentQuoteData = {
                 material: material,
-                name: itemName, 
+                name: itemName,
                 price: totalPrice,
                 quantity: quantity,
                 unit_type: unitType,
-                details: `Total: ${formatRate(totalPrice)} (${formatRate(unitPrice)} c/u)`, 
-                unit_price: unitPrice 
+                details: `Total: ${formatRate(totalPrice)} (${formatRate(unitPrice)} c/u)`,
+                unit_price: unitPrice
             };
 
             addButton.disabled = totalPrice <= 0;
         }
         
-        // ======================================================================
-        // F. FUNCIÓN PRINCIPAL DE COTIZACIÓN (Manejo de Interfaces)
-        // ======================================================================
+        // FUNCIÓN PRINCIPAL DE COTIZACIÓN (Manejo de Interfaces)
         window.calculateQuote = function() {
             const material = document.getElementById('material').value;
             const isDtfPremium = (material === 'premium_dtf');
@@ -1111,28 +1112,26 @@
             
             const vasoTypeContainer = document.getElementById('vaso-type-container');
             const vasoSelect = document.getElementById('select-vaso');
-            const mantelitoTypeContainer = document.getElementById('mantelito-type-container'); 
+            const mantelitoTypeContainer = document.getElementById('mantelito-type-container');
 
             // Ocultar todas las interfaces primero
             document.getElementById('dtf-interface').classList.add('hidden');
             document.getElementById('area-inputs').classList.add('hidden');
             document.getElementById('product-inputs').classList.add('hidden');
             vasoTypeContainer.classList.add('hidden');
-            mantelitoTypeContainer.classList.add('hidden'); 
+            mantelitoTypeContainer.classList.add('hidden');
             
             // Lógica de DTF
             if (isDtfPremium) {
                 document.getElementById('dtf-interface').classList.remove('hidden');
                 
-                const calculatedLength = calculateDtfLength(); 
+                const calculatedLength = calculateDtfLength();
                 
                 const directInput = document.getElementById('printed_length_direct');
                 
-                // Si la calculadora da un valor, lo establece en el input de cotización
                 if (calculatedLength > 0 && calculatedLength !== parseFloat(directInput.value)) {
                      directInput.value = calculatedLength;
                 } else if (parseFloat(directInput.value) < MIN_DTF_LENGTH) {
-                    // Asegura que el valor mínimo sea 10 cm si es menor
                    directInput.value = MIN_DTF_LENGTH;
                 }
                 
@@ -1158,15 +1157,9 @@
             }
         }
 
-        // ======================================================================
-        // G. LÓGICA DEL CARRITO (LISTA DE PRODUCTOS)
-        // ======================================================================
-        
-        /**
-         * Genera el mensaje y link de WhatsApp
-         */
+        // LÓGICA DEL CARRITO (LISTA DE PRODUCTOS)
         function updateWhatsappLink(listTotal) {
-            const whatsappNumber = '5216677809284'; 
+            const whatsappNumber = '5216677809284';
             const formattedTotal = formatTotal(listTotal);
             
             let message = `¡Hola! Quiero confirmar mi pedido de Algo Special. Mi lista de cotización es:\n\n`;
@@ -1179,13 +1172,11 @@
                     let nameDisplay = item.name;
                     let priceDisplay = formatTotal(item.price);
 
-                    // Construir la descripción según el tipo de producto
                     if (item.material === 'premium_dtf') {
                         message += `(${quantityDisplay}) CM ${nameDisplay} ${priceDisplay}\n`;
                     } else if (PLANILLA_MATERIALS.includes(item.material)) {
                         message += `(${quantityDisplay}) PLANILLA ${nameDisplay} ${priceDisplay}\n`;
                     } else {
-                        // Para productos fijos como Vasos, Mantelitos, Combos
                         message += `(${quantityDisplay}) ${nameDisplay} ${priceDisplay}\n`;
                     }
                 });
@@ -1199,9 +1190,6 @@
             document.getElementById('order-button').href = whatsappLink;
         }
 
-        /**
-         * Renderiza la lista de productos y actualiza el total.
-         */
         function updateQuoteListAndTotal() {
             const listContainer = document.getElementById('quote-list');
             const totalElement = document.getElementById('final-total');
@@ -1211,11 +1199,10 @@
 
             totalElement.textContent = formatTotal(listTotal);
             
-            // Habilitar/deshabilitar botón de generar ticket
             generateTicketBtn.disabled = quoteList.length === 0;
             
             if (quoteList.length === 0) {
-                listContainer.innerHTML = '<p id="empty-list-message" class="text-center text-gray-500 italic">La lista está vacía.</p>';
+                listContainer.innerHTML = '<p id="empty-list-message" class="text-center text-gray-500 italic text-sm sm:text-base">La lista está vacía.</p>';
             } else {
                 let htmlContent = '';
                 quoteList.forEach((item, index) => {
@@ -1223,35 +1210,30 @@
                     const quantityDisplay = item.quantity.toFixed(0);
                     let fullDescription = '';
 
-                    // Construir la cadena de texto para la línea del producto
                     if (item.material === 'premium_dtf') {
                         fullDescription = `(${quantityDisplay}) CM ${item.name}`;
                     } else if (PLANILLA_MATERIALS.includes(item.material)) {
                         fullDescription = `(${quantityDisplay}) PLANILLA ${item.name}`;
                     } else {
-                        // Para productos fijos como Vasos, Mantelitos, Combos
                         fullDescription = `(${quantityDisplay}) ${item.name}`;
                     }
                     
                     const priceDisplay = formatTotal(item.price);
 
                     htmlContent += `
-                        <div class="flex justify-between items-center p-3 bg-text-light rounded-lg border border-gray-400 text-sm sm:text-base">
-                            <!-- Descripción (Izquierda) -->
-                            <div class="flex-1 min-w-0 pr-4">
-                                <p class="font-bold text-text-dark">
+                        <div class="flex justify-between items-center p-2 sm:p-3 bg-text-light rounded-lg border border-gray-400 text-xs sm:text-sm md:text-base">
+                            <div class="flex-1 min-w-0 pr-2 sm:pr-4">
+                                <p class="font-bold text-text-dark break-words">
                                     ${fullDescription}
                                 </p>
                             </div>
                             
-                            <!-- Precio y Botón de Eliminar (Derecha) -->
-                            <div class="flex items-center space-x-3 flex-shrink-0">
-                                <span class="font-extrabold text-primary text-lg whitespace-nowrap">
+                            <div class="flex items-center space-x-2 sm:space-x-3 flex-shrink-0">
+                                <span class="font-extrabold text-primary text-base sm:text-lg whitespace-nowrap">
                                     ${priceDisplay}
                                 </span>
                                 <button onclick="removeItemFromList(${index})" title="Eliminar Producto" class="p-1 rounded-full hover:bg-red-100">
-                                    <!-- Icono de bote de basura (SVG en línea) -->
-                                    <svg class="trash-icon w-5 h-5 text-gray-600 hover:text-red-500" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                    <svg class="trash-icon w-4 h-4 sm:w-5 sm:h-5 text-gray-600 hover:text-red-500" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
                                         <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 6h6v10H7V6z" clip-rule="evenodd"></path>
                                     </svg>
                                 </button>
@@ -1265,16 +1247,12 @@
             updateWhatsappLink(listTotal);
         }
 
-        /**
-         * Añade la cotización actual a la lista de productos (carrito).
-         */
         window.addCurrentQuoteToList = function() {
             if (currentQuoteData.price > 0) {
-                const itemToAdd = { ...currentQuoteData, id: Date.now() + Math.random() }; 
+                const itemToAdd = { ...currentQuoteData, id: Date.now() + Math.random() };
                 quoteList.push(itemToAdd);
                 updateQuoteListAndTotal();
                 
-                // Efecto visual:
                 let addButtonId = '';
                 const material = document.getElementById('material').value;
 
@@ -1289,7 +1267,7 @@
                 const addButton = document.getElementById(addButtonId);
                 if (addButton) {
                     addButton.textContent = '¡AÑADIDO!';
-                    addButton.classList.add('bg-secondary', 'text-text-dark', 'pulse-secondary-animation'); 
+                    addButton.classList.add('bg-secondary', 'text-text-dark', 'pulse-secondary-animation');
                     addButton.classList.remove('bg-primary', 'text-text-light');
                     setTimeout(() => {
                         addButton.textContent = 'AÑADIR A LA LISTA';
@@ -1303,9 +1281,6 @@
             }
         }
 
-        /**
-         * Elimina un producto de la lista por su índice.
-         */
         window.removeItemFromList = function(index) {
             if (index > -1 && index < quoteList.length) {
                 quoteList.splice(index, 1);
@@ -1313,13 +1288,7 @@
             }
         }
 
-        // ======================================================================
-        // H. GENERADOR DE TICKET
-        // ======================================================================
-        
-        /**
-         * Genera el contenido del ticket
-         */
+        // GENERADOR DE TICKET
         function generateTicketContent() {
             const ticketPreview = document.getElementById('ticket-preview');
             const listTotal = quoteList.reduce((sum, item) => sum + item.price, 0);
@@ -1333,7 +1302,7 @@
             
             let ticketHTML = `
                 <div class="ticket-header">
-                    <img src="https://www.dropbox.com/scl/fi/xpobzj48hrvwrggk9w2iz/INSTAGRAM.png?rlkey=zcxxkd3uuj27nlbsiccynl6ju&st=aciec22s&dl=1" 
+                    <img src="https://www.dropbox.com/scl/fi/xpobzj48hrvwrggk9w2iz/INSTAGRAM.png?rlkey=zcxxkd3uuj27nlbsiccynl6ju&st=cj2dj0xl&dl=1" 
                          alt="Logo de Algo Special" 
                          class="ticket-logo">
                     <div class="ticket-title">ALGO SPECIAL</div>
@@ -1342,7 +1311,6 @@
                 </div>
             `;
             
-            // Agregar productos al ticket
             quoteList.forEach(item => {
                 const quantityDisplay = item.quantity.toFixed(0);
                 let description = '';
@@ -1363,7 +1331,6 @@
                 `;
             });
             
-            // Agregar total
             ticketHTML += `
                 <div class="ticket-total">
                     <span>TOTAL</span>
@@ -1379,9 +1346,6 @@
             ticketPreview.innerHTML = ticketHTML;
         }
         
-        /**
-         * Genera y muestra el ticket
-         */
         function generateTicket() {
             if (quoteList.length === 0) {
                 alert('No hay productos en la lista para generar un ticket.');
@@ -1392,21 +1356,15 @@
             document.getElementById('ticket-container').classList.remove('hidden');
         }
         
-        /**
-         * Cierra la vista previa del ticket
-         */
         function closeTicketPreview() {
             document.getElementById('ticket-container').classList.add('hidden');
         }
         
-        /**
-         * Descarga el ticket como imagen
-         */
         function downloadTicket() {
             const ticketElement = document.getElementById('ticket-preview');
             
             html2canvas(ticketElement, {
-                scale: 2, // Mejor calidad
+                scale: 2,
                 backgroundColor: '#ffffff'
             }).then(canvas => {
                 const link = document.createElement('a');
@@ -1414,21 +1372,15 @@
                 link.href = canvas.toDataURL('image/png');
                 link.click();
                 
-                // Cerrar la vista previa después de descargar
                 closeTicketPreview();
             });
         }
 
-        // ======================================================================
-        // I. INICIALIZACIÓN
-        // ======================================================================
-        
-        // Iniciar la cotización al cargar la página
+        // INICIALIZACIÓN
         window.addEventListener('load', () => {
-             window.calculateQuote(); 
-             updateQuoteListAndTotal(); // Actualiza la lista vacía y el link de WhatsApp
+             window.calculateQuote();
+             updateQuoteListAndTotal();
         });
-        
     </script>
 </body>
 </html>
