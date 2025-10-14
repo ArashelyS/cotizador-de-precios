@@ -40,12 +40,12 @@
             box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
             border: 2px solid #000000;
         }
-        input[type="number"], select {
+        input[type="number"], select, textarea {
             transition: all 0.2s;
             border-color: #000000;
             font-size: 16px; /* Previene zoom en iOS */
         }
-        input:focus, select:focus {
+        input:focus, select:focus, textarea:focus {
             border-color: #FF1F9F !important;
             box-shadow: 0 0 0 3px rgba(255, 31, 159, 0.5) !important;
         }
@@ -422,6 +422,17 @@
                                class="mt-1 block w-full rounded-lg border-2 border-text-dark shadow-md p-2 sm:p-3 bg-text-light focus:ring-primary focus:border-primary text-text-dark text-sm sm:text-base">
                     </div>
 
+                    <!-- NUEVO: Campo para Detalles de Personalización -->
+                    <div id="personalization-container" class="hidden space-y-2">
+                        <label for="personalization_details" class="block text-sm sm:text-base font-semibold text-text-dark mb-1">DETALLES DE PERSONALIZACIÓN</label>
+                        <textarea id="personalization_details" 
+                                  placeholder="Ej: Logo de empresa, nombre del evento, diseño específico, etc."
+                                  oninput="calculateFixedPrice()"
+                                  class="mt-1 block w-full rounded-lg border-2 border-text-dark shadow-md p-2 sm:p-3 bg-text-light focus:ring-primary focus:border-primary text-text-dark text-sm sm:text-base resize-none"
+                                  rows="3"></textarea>
+                        <p class="text-xs text-text-dark/70">Describe los detalles de la personalización que necesitas</p>
+                    </div>
+
                     <!-- Resultado de Productos Fijos (Total en Pesos / Costo por Unidad) -->
                     <div class="space-y-2 pt-3 sm:pt-4 border-t border-text-dark/30">
                         <!-- Fila 1: TOTAL EN PESOS -->
@@ -749,7 +760,8 @@
             details: '',
             width: 0,
             height: 0,
-            sticker_quantity: 0
+            sticker_quantity: 0,
+            personalization: '' // NUEVO: Campo para detalles de personalización
         };
 
         // FUNCIONES DE FORMATO
@@ -876,7 +888,8 @@
                 details: `${lengthForPricing.toFixed(0)} CM @ ${formatRate(effectiveRate)}/cm`,
                 width: parseFloat(document.getElementById('width_dtf').value) || 0,
                 height: parseFloat(document.getElementById('height_dtf').value) || 0,
-                sticker_quantity: parseFloat(document.getElementById('quantity_dtf').value) || 0
+                sticker_quantity: parseFloat(document.getElementById('quantity_dtf').value) || 0,
+                personalization: '' // DTF no tiene personalización
             };
             
             addButton.disabled = totalPrice <= 0;
@@ -1001,7 +1014,8 @@
                 width: width,
                 height: height,
                 sticker_quantity: quantity,
-                fit_per_sheet: fitPerSheet
+                fit_per_sheet: fitPerSheet,
+                personalization: '' // Planillas no tienen personalización
             };
             
             addButton.disabled = totalCost <= 0;
@@ -1044,6 +1058,7 @@
             const material = document.getElementById('material').value;
             const vasoSelect = document.getElementById('select-vaso');
             const mantelitoSelect = document.getElementById('select-mantelito');
+            const personalizationInput = document.getElementById('personalization_details');
 
             const selectedType = (material === 'mantelito') ? mantelitoSelect.value : vasoSelect.value;
             const quantityInput = document.getElementById('quantity_product').value;
@@ -1053,6 +1068,7 @@
             const unitPriceElement = document.getElementById('product-unit-price');
 
             const quantity = parseInt(quantityInput) || 0;
+            const personalization = personalizationInput ? personalizationInput.value.trim() : '';
             
             let itemData;
             let unitPrice = 0;
@@ -1111,7 +1127,8 @@
                 quantity: quantity,
                 unit_type: unitType,
                 details: `Total: ${formatRate(totalPrice)} (${formatRate(unitPrice)} c/u)`,
-                unit_price: unitPrice
+                unit_price: unitPrice,
+                personalization: personalization // NUEVO: Guardar detalles de personalización
             };
 
             addButton.disabled = totalPrice <= 0;
@@ -1127,6 +1144,7 @@
             const vasoTypeContainer = document.getElementById('vaso-type-container');
             const vasoSelect = document.getElementById('select-vaso');
             const mantelitoTypeContainer = document.getElementById('mantelito-type-container');
+            const personalizationContainer = document.getElementById('personalization-container');
 
             // Ocultar todas las interfaces primero
             document.getElementById('dtf-interface').classList.add('hidden');
@@ -1134,6 +1152,7 @@
             document.getElementById('product-inputs').classList.add('hidden');
             vasoTypeContainer.classList.add('hidden');
             mantelitoTypeContainer.classList.add('hidden');
+            personalizationContainer.classList.add('hidden');
             
             // Lógica de DTF
             if (isDtfPremium) {
@@ -1159,6 +1178,7 @@
             // Lógica de Productos Fijos
             } else if (isFixedProduct) {
                 document.getElementById('product-inputs').classList.remove('hidden');
+                personalizationContainer.classList.remove('hidden'); // NUEVO: Mostrar campo de personalización
                 
                 if (material === 'vaso' || material === 'combo') {
                     vasoTypeContainer.classList.remove('hidden');
@@ -1201,7 +1221,8 @@
                         totalSheets: item.quantity,
                         totalPrice: item.price,
                         items: [item],
-                        unit_price: item.unit_price || 0
+                        unit_price: item.unit_price || 0,
+                        personalization: item.personalization || '' // NUEVO: Incluir personalización
                     };
                 }
             });
@@ -1248,6 +1269,11 @@
                     } else {
                         // Para productos fijos
                         message += `(${group.totalSheets}) ${group.name} ${formatTotal(group.totalPrice)}\n`;
+                        
+                        // NUEVO: Agregar detalles de personalización si existen (sin la palabra "Personalización")
+                        if (group.personalization && group.personalization.trim() !== '') {
+                            message += `   ${group.personalization}\n`;
+                        }
                     }
                 });
             }
@@ -1337,23 +1363,38 @@
                         const priceDisplay = formatTotal(group.totalPrice);
 
                         htmlContent += `
-                            <div class="flex justify-between items-center p-2 sm:p-3 bg-text-light rounded-lg border border-gray-400 text-xs sm:text-sm md:text-base">
-                                <div class="flex-1 min-w-0 pr-2 sm:pr-4">
-                                    <p class="font-bold text-text-dark break-words">
-                                        ${fullDescription}
-                                    </p>
+                            <div class="flex flex-col p-2 sm:p-3 bg-text-light rounded-lg border border-gray-400 text-xs sm:text-sm md:text-base mb-2">
+                                <div class="flex justify-between items-center mb-2">
+                                    <div class="flex-1 min-w-0 pr-2 sm:pr-4">
+                                        <p class="font-bold text-text-dark break-words">
+                                            ${fullDescription}
+                                        </p>
+                                    </div>
+                                    <div class="flex items-center space-x-2 sm:space-x-3 flex-shrink-0">
+                                        <span class="font-extrabold text-primary text-base sm:text-lg whitespace-nowrap">
+                                            ${priceDisplay}
+                                        </span>
+                                        <button onclick="removeGroupFromList('${key}')" title="Eliminar Producto" class="p-1 rounded-full hover:bg-red-100">
+                                            <svg class="trash-icon w-4 h-4 sm:w-5 sm:h-5 text-gray-600 hover:text-red-500" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                                <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 6h6v10H7V6z" clip-rule="evenodd"></path>
+                                            </svg>
+                                        </button>
+                                    </div>
                                 </div>
-                                
-                                <div class="flex items-center space-x-2 sm:space-x-3 flex-shrink-0">
-                                    <span class="font-extrabold text-primary text-base sm:text-lg whitespace-nowrap">
-                                        ${priceDisplay}
-                                    </span>
-                                    <button onclick="removeGroupFromList('${key}')" title="Eliminar Producto" class="p-1 rounded-full hover:bg-red-100">
-                                        <svg class="trash-icon w-4 h-4 sm:w-5 sm:h-5 text-gray-600 hover:text-red-500" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                                            <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 6h6v10H7V6z" clip-rule="evenodd"></path>
-                                        </svg>
-                                    </button>
+                        `;
+                        
+                        // NUEVO: Mostrar detalles de personalización si existen (sin la palabra "Personalización")
+                        if (group.personalization && group.personalization.trim() !== '') {
+                            htmlContent += `
+                                <div class="pl-2 border-l-2 border-primary/30 mt-1">
+                                    <div class="text-xs text-text-dark/70 bg-gray-50 p-2 rounded">
+                                        ${group.personalization}
+                                    </div>
                                 </div>
+                            `;
+                        }
+                        
+                        htmlContent += `
                             </div>
                         `;
                     }
@@ -1496,7 +1537,21 @@
                     // Para productos fijos
                     ticketHTML += `
                         <div class="ticket-item">
-                            <span>${group.totalSheets} ${group.name}</span>
+                            <div>
+                                <span>${group.totalSheets} ${group.name}</span>
+                    `;
+                    
+                    // NUEVO: Mostrar detalles de personalización si existen (sin la palabra "Personalización")
+                    if (group.personalization && group.personalization.trim() !== '') {
+                        ticketHTML += `
+                            <div style="font-size: 11px; color: #666; margin-top: 2px;">
+                                ${group.personalization}
+                            </div>
+                        `;
+                    }
+                    
+                    ticketHTML += `
+                            </div>
                             <span>${formatTotal(group.totalPrice)}</span>
                         </div>
                     `;
