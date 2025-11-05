@@ -647,16 +647,16 @@
 
         const COMBO_PRICING = {
             'combo_cilindro_chupon': [
-                { max: 24, price: 35 },
-                { max: Infinity, price: 30 }
+                { max: 24, price: 30 },
+                { max: Infinity, price: 27 }
             ],
             'combo_cilindro_popote': [
-                { max: 24, price: 37 },
+                { max: 24, price: 35 },
                 { max: Infinity, price: 30 }
             ],
             'combo_vaso_popote_16oz': [
                 { max: 24, price: 50 },
-                { max: Infinity, price: 45 }
+                { max: Infinity, price: 40 }
             ],
             'combo_vaso_popote_24oz': [
                 { max: 24, price: 65 },
@@ -974,7 +974,7 @@
                 } else if (selectedType === 'combo_vaso_popote_16oz') {
                     pricingData = [
                         { range: '1-24 combos', price: '$50.00 c/u' },
-                        { range: '25+ combos', price: '$45.00 c/u' }
+                        { range: '25+ combos', price: '$40.00 c/u' }
                     ];
                 } else if (selectedType === 'combo_vaso_popote_24oz') {
                     pricingData = [
@@ -983,12 +983,12 @@
                     ];
                 } else if (selectedType === 'combo_cilindro_chupon') {
                     pricingData = [
-                        { range: '1-24 combos', price: '$35.00 c/u' },
-                        { range: '25+ combos', price: '$30.00 c/u' }
+                        { range: '1-24 combos', price: '$30.00 c/u' },
+                        { range: '25+ combos', price: '$27.00 c/u' }
                     ];
                 } else if (selectedType === 'combo_cilindro_popote') {
                     pricingData = [
-                        { range: '1-24 combos', price: '$37.00 c/u' },
+                        { range: '1-24 combos', price: '$35.00 c/u' },
                         { range: '25+ combos', price: '$30.00 c/u' }
                     ];
                 }
@@ -1537,7 +1537,8 @@
             
             Object.keys(groupedItems).forEach(material => {
                 const group = groupedItems[material];
-                const groupedPrice = calculateGroupedTotalPrice(material, group.totalSheets);
+                const totalSheets = group.totalSheets;
+                const groupedPrice = calculateGroupedTotalPrice(material, totalSheets);
                 listTotal += groupedPrice;
             });
 
